@@ -61,14 +61,33 @@
     ```
 
 ## 方法
-- disable() 停用标签页
+### disable() 
+> 停用标签页
 ```javascript
-chrome.action.disable();
+    chrome.action.enable(
+        // tabId: 0, // 要启用操作的标签页的 ID。如果未指定任何标签页，则启用所有标签页的操作。
+    ).then(() => {
+        console.log("操作已启用");
+    }).catch((error) => {
+        console.error("启用操作时出错:", error);
+    });
 ```
 
+### enable()
+> 为标签页启用操作。默认情况下，操作处于启用状态
+```javascript
+chrome.action.disable(
+    // tabId: 0, // 要停用操作的标签页的 ID。如果未指定任何标签页，则停用所有标签页的操作。
+).then(() => {
+    console.log("操作已停用");
+}).catch((error) => {
+    console.error("停用操作时出错:", error);
+});
+```
 
 ## 事件
-- onClicked 在用户点击操作图标时触发。如果操作具有弹出式窗口，则不会触发此事件
+### onClicked 
+> 在用户点击操作图标时触发。如果操作具有弹出式窗口，则不会触发此事件
 ```javascript
 // 在用户点击操作图标时触发。如果操作具有弹出式窗口，则不会触发此事件。
 chrome.action.onClicked.addListener(function(tab) {
@@ -103,7 +122,8 @@ chrome.action.onClicked.addListener(function(tab) {
 });
 ```
 
-- onUserSettingsChanged 在与扩展程序操作相关的用户指定设置发生更改时触发
+### onUserSettingsChanged 
+> 在与扩展程序操作相关的用户指定设置发生更改时触发
 ```javascript
 // 在与扩展程序操作相关的用户指定设置发生更改时触发。
 // 例如，用户在扩展程序的选项页面中更改了某些设置。
