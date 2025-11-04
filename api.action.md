@@ -3,7 +3,7 @@
 > 使用 chrome.action API 控制 Google Chrome 工具栏中的扩展程序图标
 > 操作图标显示在浏览器工具栏中的 omnibox 旁边。安装后，这些扩展程序会显示在扩展程序菜单（拼图图标）中。用户可以将您的扩展程序图标固定到工具栏。
 
-## manifast.json
+## manifest.json
 ```json
 {
     "action": {

@@ -2,10 +2,15 @@
 * [README](./README.md)
 
 ## 入门
-* [Hello World 扩展](./demo.get-start.md "Hello World 扩展")
+* [第一个 Hello World 扩展](./demo.get-start.md "第一个 Hello World 扩展")
 
 ## API 
 * [action](./api.action.md "chrome.action 管理工具栏中的扩展程序图标")
+
+
+## 参考
+* [清单说明](./reference.manifest.md "清单说明")
+* [权限说明](./reference.permissions.md "权限说明")
 
 ## 实战项目
 * [LeetCode 助手](./demo.leetcode-helper.md "LeetCode 助手")
