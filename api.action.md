@@ -3,7 +3,7 @@
 > 使用 chrome.action API 控制 Google Chrome 工具栏中的扩展程序图标
 > 操作图标显示在浏览器工具栏中的 omnibox 旁边。安装后，这些扩展程序会显示在扩展程序菜单（拼图图标）中。用户可以将您的扩展程序图标固定到工具栏。
 
-## manifest.json
+## manifest.json 设置
 ```json
 {
     "action": {
@@ -85,6 +85,171 @@ chrome.action.disable(
 });
 ```
 
+### getBadgeBackgroundColor()
+> 获取 action 图片 badge 的背景颜色
+```javascript
+chrome.action.getBadgeBackgroundColor({
+    // tabId: 0, // TabDetails.tabId 要查询状态的标签页的 ID。如果未指定任何标签页，则返回非标签页专用状态。
+}, function(color) {
+    console.log("徽章背景颜色:", color); // [number, number, number, number] RGBA 数组
+});
+```
+
+### getBadgeText()
+> 获取 action 的 badge 文本。如果未指定任何标签页，则返回非标签页特定的徽章文字。
+> 如果启用了 displayActionCountAsBadgeText，则除非存在 declarativeNetRequestFeedback 权限或提供了标签页专用徽章文本，否则系统会返回占位文本。
+```javascript
+chrome.action.getBadgeText({
+    // tabId: 0, // TabDetails.tabId 要查询状态的标签页的 ID。如果未指定任何标签页，则返回非标签页专用状态。
+}, function(text) {
+    console.log("徽章文本:", text);
+});
+```
+
+### getBadgeTextColor()
+> 获取 action 的 badge 文字颜色
+```javascript
+chrome.action.getBadgeTextColor({
+    // tabId: 0, // TabDetails.tabId 要查询状态的标签页的 ID。如果未指定任何标签页，则返回非标签页专用状态。
+}, function(color) {
+    console.log("徽章文字颜色:", color); // [number, number, number, number] RGBA 数组
+});
+```
+
+### getPopup()
+> 获取 action 弹出式窗口的 HTML 文档路径
+```javascript
+chrome.action.getPopup({
+    // tabId: 0, // TabDetails.tabId 要查询状态的标签页的 ID。如果未指定任何标签页，则返回非标签页专用状态。
+}, function(path) {
+    console.log("弹出式窗口文件路径:", path);
+});
+```
+
+### getTitle()
+> 获取 action 的标题
+```javascript
+chrome.action.getTitle({
+    // tabId: 0, // TabDetails.tabId 要查询状态的标签页的 ID。如果未指定任何标签页，则返回非标签页专用状态。
+}, function(title) {
+    console.log("action 标题:", title);
+});
+```
+
+### getUserSettings()
+> 返回与扩展程序 action 相关的用户指定设置
+```javascript
+chrome.action.getUserSettings(function(setting) {
+    console.log("操作设置:", setting); 
+    console.log("UserSettings.isOnToolbar:", setting.isOnToolbar); // isOnToolbar扩展程序的 action 图标是否显示在浏览器窗口的顶级工具栏上（即，用户是否已“固定”该扩展程序）
+});
+```
+
+### isEnabled()
+> 指示扩展程序操作是否已针对某个标签页启用（如果未提供 tabId，则表示已全局启用）。仅使用 declarativeContent 启用的操作始终返回 false。
+```javascript
+chrome.action.isEnabled({
+    // tabId: 0, // TabDetails.tabId 要查询状态的标签页的 ID。如果未指定任何标签页，则返回非标签页专用状态。
+}, function(isEnabled) {
+    console.log("操作是否已启用:", isEnabled);
+});
+```
+
+### openPopup()
+> 打开扩展程序的弹出式窗口。在 Chrome 118 和 Chrome 126 之间，此功能仅适用于根据政策安装的扩展程序
+```javascript
+chrome.action.openPopup({
+    // windowId: chrome.windows.WINDOW_ID_CURRENT, // 要在其中打开操作弹出式窗口的窗口的 ID。如果未指定，则默认为当前活跃窗口。
+}).then(() => {
+    console.log("弹出式窗口已打开");
+}).catch((error) => {
+    console.error("打开弹出式窗口时出错:", error);
+});
+```
+
+### setBadgeBackgroundColor()
+> 设置 badge 的背景颜色
+```javascript
+chrome.action.setBadgeBackgroundColor({
+    color: [255, 0, 0, 255], // 要设置的背景颜色。 也可以为字符串格式  #FF0000
+    // color: "#FF0000", // 字符串格式
+    // tabId: 0, // TabDetails.tabId 要设置状态的标签页的 ID。如果未指定任何标签页，则将非标签页专用状态设置为指定值。
+}).then(() => {
+    console.log("徽章背景颜色已设置");
+}).catch((error) => {
+    console.error("设置徽章背景颜色时出错:", error);
+});
+``` 
+
+### setBadgeText()
+> 为 action 设置 badge 文本。badge 显示在图标上方
+```javascript
+// 可以传递任意数量的字符，但空间中只能容纳大约 4 个字符。
+// 如果传递的是空字符串 ('')，则会清除标记文本。如果指定了 tabId，但 text 为 null，则指定标签页的文字会被清除，并默认设为全局徽章文字。
+chrome.action.setBadgeText({
+    text: "123", // 要设置的文本。如果为空字符串，则会清除徽章。
+    // tabId: 0, // TabDetails.tabId 要设置状态的标签页的 ID。如果未指定任何标签页，则将非标签页专用状态设置为指定值。
+}).then(() => {
+    console.log("徽章文本已设置");
+}).catch((error) => {
+    console.error("设置徽章文本时出错:", error);
+});
+``` 
+
+### setBadgeTextColor()
+> 设置 badge 的文字颜色
+```javascript
+chrome.action.setBadgeTextColor({
+    color: [255, 0, 0, 255], // 要设置的文字颜色。 也可以为字符串格式  #FF0000
+    // color: "#FF0000", // 字符串格式
+    // tabId: 0, // TabDetails.tabId 要设置状态的标签页的 ID。如果未指定任何标签页，则将非标签页专用状态设置为指定值。
+}).then(() => {
+    console.log("徽章文字颜色已设置");
+}).catch((error) => {
+    console.error("设置徽章文字颜色时出错:", error);
+});
+``` 
+
+### setIcon()
+> 为操作设置图标。图标可以指定为图片文件的路径、画布元素的像素数据，也可以指定为包含其中任一信息的字典。必须指定 path 或 imageData 属性
+```javascript
+chrome.action.setIcon({
+    // imageData: {} // 要设置的图标，可以是 ImageData 对象，也可以是表示图标的字典 {size -> ImageData}。如果图标指定为字典，则会根据屏幕的像素密度选择要使用的实际图片。
+    path: "icon.png", // 相对图片路径或指向要设置的图标的字典 {size -> relative image path}。如果图标指定为字典，则会根据屏幕的像素密度选择要使用的实际图片。
+    // tabId: 0, // TabDetails.tabId 要设置状态的标签页的 ID。如果未指定任何标签页，则将非标签页专用状态设置为指定值。
+}).then(() => {
+    console.log("图标已设置");
+}).catch((error) => {
+    console.error("设置图标时出错:", error);
+});
+``` 
+
+### setPopup()
+> 设置 HTML 文档，以便在用户点击操作的图标时将其作为弹出式窗口打开
+```javascript
+chrome.action.setPopup({
+    popup: "popup.html", // 要在弹出式窗口中显示的 HTML 文件的相对路径。如果设置为空字符串 ('')，则不显示任何弹出式窗口。
+    // tabId: 0, // TabDetails.tabId 要设置状态的标签页的 ID。如果未指定任何标签页，则将非标签页专用状态设置为指定值。
+}).then(() => {
+    console.log("弹出式窗口已设置");
+}).catch((error) => {
+    console.error("设置弹出式窗口时出错:", error);
+});
+``` 
+
+### setTitle()
+> 设置操作的标题。标题显示在用户将鼠标悬停在操作图标上时
+```javascript
+chrome.action.setTitle({
+    title: "我的扩展", // 鼠标悬停时操作应显示的字符串。
+    // tabId: 0, // TabDetails.tabId 要设置状态的标签页的 ID。如果未指定任何标签页，则将非标签页专用状态设置为指定值。
+}).then(() => {
+    console.log("标题已设置");
+}).catch((error) => {
+    console.error("设置标题时出错:", error);
+});
+``` 
+
 ## 事件
 ### onClicked 
 > 在用户点击操作图标时触发。如果操作具有弹出式窗口，则不会触发此事件
@@ -134,6 +299,8 @@ chrome.action.onUserSettingsChanged.addListener(function(change) {
 ```
 
 ## 项目
+> https://github.com/freewu/plugin-demo/blob/main/chrome-extension-demo/demo2/
+![action](./images/api/action-setting.png)
 
 
 ## 资料
