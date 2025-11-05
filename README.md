@@ -13,7 +13,7 @@
 | action                             | ✅️       | 右上角 popup 展示                                                        |
 | alarms                             | ✅️       | 闹钟展示                                                               |
 | audio                              | ❌️       | 仅限 ChromeOS                                                         |
-| bookmarks                          | 未开始    | 创建、整理和以其他方式操作书签                                            |
+| bookmarks                          | ✅️       | 创建、整理和以其他方式操作书签                                            |
 | browsingData                       | 未开始    | 从用户的本地个人资料中移除浏览数据                                         |
 | certificateProvider                | ❌️       | 仅限 ChromeOS                                                         |
 | clipboard                          | 未开始    | 剪贴板展示                                                             |
