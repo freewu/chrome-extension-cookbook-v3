@@ -10,8 +10,8 @@
 | Chrome API                         |  完成     | 备注                                                                  |
 | ---------------------------------- | -------- | --------------------------------------------------------------------- |
 | accessibilityFeatures              | ❌️       | 仅限 ChromeOS                                                         |
-| action                             | ✅️       | 右上角popup展示                                                        |
-| alarms                             | 未开始    | 闹钟展示                                                               |
+| action                             | ✅️       | 右上角 popup 展示                                                        |
+| alarms                             | ✅️       | 闹钟展示                                                               |
 | audio                              | ❌️       | 仅限 ChromeOS                                                         |
 | bookmarks                          | 未开始    | 创建、整理和以其他方式操作书签                                            |
 | browsingData                       | 未开始    | 从用户的本地个人资料中移除浏览数据                                         |

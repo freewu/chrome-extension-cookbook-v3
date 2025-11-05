@@ -5,8 +5,8 @@
 * [第一个 Hello World 扩展](./demo.get-start.md "第一个 Hello World 扩展")
 
 ## API 
-* [action](./api.action.md "chrome.action 管理工具栏中的扩展程序图标")
-
+* [action](./api.action.md "chrome.action 管理工具栏中的扩展程序图标功能展示")
+* [alarms](./api.alarms.md "chrome.alarms 管理闹钟功能展示")  
 
 ## 参考
 * [清单说明](./reference.manifest.md "清单说明")
