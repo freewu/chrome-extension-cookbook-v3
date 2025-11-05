@@ -1,0 +1,21 @@
+{
+  "name": "chrome-extension-cookbook-v3",
+  "version": "1.0.0",
+  "description": "<img src=\"./images/book cover.png\" />",
+  "homepage": "https://github.com/freewu/chrome-extension-cookbook-v3#readme",
+  "bugs": {
+    "url": "https://github.com/freewu/chrome-extension-cookbook-v3/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freewu/chrome-extension-cookbook-v3.git"
+  },
+  "license": "MIT",
+  "author": "bluefrog.wu@gmail.com",
+  "scripts": {
+    "pdf": "./node_modules/.bin/docsify-to-pdf"
+  },
+  "devDependencies": {
+    "docsify-to-pdf": "^0.0.5"
+  }
+}
