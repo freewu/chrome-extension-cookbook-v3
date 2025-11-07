@@ -14,7 +14,7 @@
 | alarms                             | ✅️       | 闹钟展示                                                               |
 | audio                              | ❌️       | 仅限 ChromeOS                                                         |
 | bookmarks                          | ✅️       | 创建、整理和以其他方式操作书签                                            |
-| browsingData                       | 未开始    | 从用户的本地个人资料中移除浏览数据                                         |
+| browsingData                       | ✅️       | 从用户的本地个人资料中移除浏览数据                                         |
 | certificateProvider                | ❌️       | 仅限 ChromeOS                                                         |
 | clipboard                          | 未开始    | 剪贴板展示                                                             |
 | commands                           | 未开始    | 键盘快捷键                                                             |
