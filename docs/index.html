@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar-folder.min.css" />
   <!-- 箭头样式 -->
   <!-- <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar.min.css" /> -->
+  <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
 </head>
 <body>
   <div id="app"></div>
@@ -21,6 +22,12 @@
         //logo: '/images/icon.png', // 在侧边栏中出现的网站图标，你可以使用CSS来更改大小
         // 侧边栏文档目录
         loadSidebar: true,
+        subMaxLevel: 1,
+        // 初始化默认展开到第N级，设99等价全部展开
+        //sidebarDisplayLevel: 0,
+        sidebarCollapse: {
+          open: true // 页面加载默认全部打开
+        },
  
         //subMaxLevel: 2,
         alias: {

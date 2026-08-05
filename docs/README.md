@@ -10,9 +10,9 @@
 | Chrome API                         |  完成     | 备注                                                                  |
 | ---------------------------------- | -------- | --------------------------------------------------------------------- |
 | accessibilityFeatures              | ❌️       | 仅限 ChromeOS                                                         |
-| action                             | ✅️       | 右上角 popup 展示                                                        |
-| alarms                             | ✅️       | 闹钟展示                                                               |
-| audio                              | ❌️       | 仅限 ChromeOS                                                         |
+| <a href="#api.action">action</a>   | ✅️       | 右上角 popup 展示                                                        |
+| <a href="#api.alarms">alarms</a>   | ✅️       | 闹钟展示                                                               |
+| <a href="#api.audio">audio</a>     | 未开始    | 音频展示                                                               |
 | bookmarks                          | ✅️       | 创建、整理和以其他方式操作书签                                            |
 | browsingData                       | ✅️       | 从用户的本地个人资料中移除浏览数据                                         |
 | certificateProvider                | ❌️       | 仅限 ChromeOS                                                         |
