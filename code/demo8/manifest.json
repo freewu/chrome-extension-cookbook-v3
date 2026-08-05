@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "闹钟展示 (chrome.alarms)",
+    "version": "1.0",
+    "description": "展示 chrome.alarms API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_title": "闹钟展示 (chrome.alarms)",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "alarms"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+    "name": "chrome.contextMenus 效果演示",
+    "description": "chrome.contextMenus 效果演示",
+    "version": "1.0",
+    "manifest_version": 3,
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "title": "chrome.contextMenus 效果演示",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "contextMenus"
+    ]
+}

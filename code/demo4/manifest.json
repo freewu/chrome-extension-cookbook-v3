@@ -1,0 +1,18 @@
+{
+    "name": "开发者工具 chrome.devtools.* 效果演示",
+    "description": "chrome.devtools.* 效果演示",
+    "version": "1.0",
+    "manifest_version": 3,
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    
+    "devtools_page": "pages/devtools.html",
+    "background": {
+        "service_worker": "js/background.js"
+    }
+    
+}

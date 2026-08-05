@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "查询和恢复浏览会话中的标签页和窗口 展示 (chrome.windows)",
+    "version": "1.0",
+    "description": "展示 chrome.windows API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.windows API",
+        "default_popup": "pages/action.html"
+    },
+    "permissions": [
+        "windows",
+        "tabs"
+    ]
+}

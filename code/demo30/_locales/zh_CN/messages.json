@@ -1,0 +1,11 @@
+{
+    "extension_name": {
+        "message": "国际化 展示 (chrome.i18n)"
+    },
+    "extension_description": {
+        "message": "展示 chrome.i18n API"
+    },
+    "extension_title": {
+        "message": "展示 chrome.i18n API"
+    }   
+}

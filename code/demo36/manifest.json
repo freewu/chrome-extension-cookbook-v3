@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "以编程方式发起、监控、操纵和搜索下载 展示 (chrome.downloads)",
+    "version": "1.0",
+    "description": "展示 chrome.downloads API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.downloads API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "downloads",
+        "downloads.ui",
+        "downloads.open"
+    ]
+}

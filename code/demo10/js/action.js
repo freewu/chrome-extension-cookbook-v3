@@ -1,0 +1,102 @@
+//
+console.log("加载 action.js");
+// 创建新标签页
+document.getElementById('create-tab-btn').addEventListener('click', () => {
+    console.log("点击创建新标签页按钮");
+    // 创建新标签页
+    chrome.tabs.create({
+        url: 'https://www.baidu.com',
+    });
+});
+
+// 复制当前标签页
+document.getElementById('duplicate-tab-btn').addEventListener('click', async () => {
+    console.log("点击复制当前标签页按钮");
+
+    let tab = await chrome.tabs.getCurrent(); // 获取当前标签页信息
+    console.log("当前标签页信息: ", tab);
+    // //console.log("tab.id: ", tab.id);
+    // console.log("tab.title: ", tab.title);
+    // console.log("tab.url: ", tab.url);
+    // console.log("tab.status: ", tab.statusstatus);
+    // // {
+    // //     "active": true,
+    // //     "audible": false,
+    // //     "autoDiscardable": true,
+    // //     "discarded": false,
+    // //     "favIconUrl": "",
+    // //     "frozen": false,
+    // //     "groupId": -1,
+    // //     "height": 932,
+    // //     "highlighted": true,
+    // //     "id": 1957801498,
+    // //     "incognito": false,
+    // //     "index": 0,
+    // //     "lastAccessed": 1760063914943.946,
+    // //     "mutedInfo": {
+    // //         "muted": false
+    // //     },
+    // //     "pinned": false,
+    // //     "selected": true,
+    // //     "splitViewId": -1,
+    // //     "status": "complete",
+    // //     "title": "扩展程序",
+    // //     "url": "chrome://extensions/",
+    // //     "width": 1707,
+    // //     "windowId": 1957801393
+    // // }
+    // // 复制当前标签页
+    // chrome.tabs.duplicate(tab.id);
+});
+
+// 重新加载标签页
+document.getElementById('reload-tab-btn').addEventListener('click', async () => {
+    chrome.tabs.reload(
+        //-1, // 要重新加载的标签页的 ID；默认为当前窗口的所选标签页
+        {
+            "bypassCache": true, // 是否绕过本地缓存。默认为 false。
+        }
+    );
+});
+
+// == tabGroups =============================================================================
+
+const tabs = await chrome.tabs.query({
+  url: [
+    'https://developer.chrome.com/docs/webstore/*',
+    'https://developer.chrome.com/docs/extensions/*'
+  ]
+});
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Collator
+const collator = new Intl.Collator();
+tabs.sort((a, b) => collator.compare(a.title, b.title));
+
+const template = document.getElementById('li_template');
+const elements = new Set();
+for (const tab of tabs) {
+  const element = template.content.firstElementChild.cloneNode(true);
+
+  const title = tab.title.split('|')[0].trim();
+  const pathname = new URL(tab.url).pathname.slice('/docs'.length);
+
+  element.querySelector('.title').textContent = title;
+  element.querySelector('.pathname').textContent = pathname;
+  element.querySelector('a').addEventListener('click', async () => {
+    // need to focus window as well as the active tab
+    await chrome.tabs.update(tab.id, { active: true });
+    await chrome.windows.update(tab.windowId, { focused: true });
+  });
+
+  elements.add(element);
+}
+document.querySelector('ul').append(...elements);
+
+const button = document.querySelector('button');
+button.addEventListener('click', async () => {
+  const tabIds = tabs.map(({ id }) => id);
+  if (tabIds.length) {
+    const group = await chrome.tabs.group({ tabIds });
+    await chrome.tabGroups.update(group, { title: 'DOCS' });
+  }
+});

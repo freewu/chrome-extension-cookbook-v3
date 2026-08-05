@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "在不同上下文中执行脚本 展示 (chrome.scripting)",
+    "version": "1.0",
+    "description": "展示 chrome.scripting API 可以在不同上下文中执行脚本",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "scripting", 
+        "webNavigation",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://*/*",
+        "http://*/*"
+    ],
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.scripting API 可以在不同上下文中执行脚本",
+        "default_popup": "pages/action.html"
+    }
+}

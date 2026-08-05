@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "可供任何扩展程序页面使用的实用程序 展示 (chrome.extension)",
+    "version": "1.0",
+    "description": "展示 chrome.extension API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.extension API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "用户脚本 展示 (chrome.userScripts)",
+    "version": "1.0",
+    "description": "展示 chrome.userScripts API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.userScripts API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "permissions": [
+        "tabs",
+        "notifications",
+        "userScripts"
+    ]
+}

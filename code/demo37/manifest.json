@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "管理 Chrome 字体设置 展示 (chrome.fontSettings)",
+    "version": "1.0",
+    "description": "展示 chrome.fontSettings API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.fontSettings API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "fontSettings"
+    ]
+}

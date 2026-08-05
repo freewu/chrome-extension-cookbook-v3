@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "书签管理 展示 (chrome.bookmarks)",
+    "version": "1.0",
+    "description": "展示 chrome.bookmarks API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.bookmarks API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "bookmarks"
+    ],
+    "chrome_url_overrides": {
+        "bookmarks": "pages/bookmarks.html"
+    }
+}

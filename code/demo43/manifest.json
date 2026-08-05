@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "管理 Chrome 的代理设置 展示 (chrome.proxy)",
+    "version": "1.0",
+    "description": "展示 chrome.proxy API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.proxy API"    
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "proxy"
+    ]
+}

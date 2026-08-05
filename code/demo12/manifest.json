@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "电源管理 展示 (chrome.power)",
+    "version": "1.0",
+    "description": "展示 chrome.power API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "power"
+    ]
+}

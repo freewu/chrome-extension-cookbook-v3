@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "检索服务工作线程、返回清单的相关详细信息，以及监听和响应扩展程序生命周期中的事件 展示 (chrome.runtime)",
+    "version": "1.0",
+    "description": "展示 chrome.runtime API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.permissions API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "nativeMessaging"
+    ],
+    "options_ui": {
+        "page": "pages/options.html",
+        "open_in_tab": false
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "name": "向地址栏注册关键字 展示 (chrome.omnibox)",
+    "version": "1.0",
+    "description": "展示 chrome.omnibox API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "omnibox": { "keyword" : "bluefrog" },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "omnibox",
+        "tabs"
+    ]
+}

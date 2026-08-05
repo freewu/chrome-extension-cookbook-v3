@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "接收有关正在处理的导航请求的状态的通知 展示 (chrome.webNavigation)",
+    "version": "1.0",
+    "description": "展示 chrome.webNavigation API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.webNavigation API",
+        "default_popup": "pages/action.html"
+    },
+    "permissions": [
+        "webNavigation",
+        "tabs"
+    ]
+}

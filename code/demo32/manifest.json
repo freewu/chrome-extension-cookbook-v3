@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "获取网站图标 展示 (chrome.favicon)",
+    "version": "1.0",
+    "description": "展示 chrome.favicon API 相关功能",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.favicon API 相关功能",
+        "default_popup": "pages/action.html"
+    },
+    "permissions": [
+        "favicon",
+        "tabs"
+    ]
+}

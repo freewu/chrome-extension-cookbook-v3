@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "系统信息 展示 (chrome.system.*)",
+    "version": "1.0",
+    "description": "展示 chrome.system.* API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "default_title": "展示 chrome.system.* API", 
+        "default_icon": "images/icon.png"
+    },
+    "permissions": [
+        "system.cpu",
+        "system.memory",
+        "system.storage",
+        "system.display"
+    ]
+}

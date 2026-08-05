@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "查询和修改 Cookie (chrome.cookies)",
+    "version": "1.0",
+    "description": "展示 chrome.cookies API 相关功能",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.cookies API 相关功能"
+    },
+    "permissions": [
+        "cookies"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ]
+}

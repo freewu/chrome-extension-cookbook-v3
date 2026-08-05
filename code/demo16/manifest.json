@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "查询和恢复浏览会话中的标签页和窗口 展示 (chrome.sessions)",
+    "version": "1.0",
+    "description": "展示 chrome.sessions API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "sessions"
+    ]
+}

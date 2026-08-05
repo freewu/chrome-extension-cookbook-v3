@@ -1,0 +1,28 @@
+{
+    "name": "侧边栏 chrome.sidePanel 效果演示",
+    "description": "侧边栏 chrome.sidePanel 效果演示",
+    "version": "1.0",
+    "manifest_version": 3,
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "title": "侧边栏 chrome.sidePanel 效果演示",
+        "default_icon": "images/icon.png"
+    },
+    "side_panel": {
+        "default_path": "pages/sidepanel.html"
+    },
+    "options_page": "pages/setting.html",
+    "permissions": [
+        "sidePanel",
+        "tabs"
+    ]
+}

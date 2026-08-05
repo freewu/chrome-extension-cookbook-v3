@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "name": "__MSG_extension_name__",
+    "version": "1.0",
+    "description": "__MSG_extension_description__",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "default_locale": "en",
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "__MSG_extension_title_"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    }
+}

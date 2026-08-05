@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "获取访问次数最多的网站 展示 (chrome.topSites)",
+    "version": "1.0",
+    "description": "展示 chrome.topSites API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "topSites"
+    ]
+}

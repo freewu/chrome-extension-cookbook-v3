@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "指定每项内容设置所影响的网站 (chrome.contentSettings)",
+    "version": "1.0",
+    "description": "展示 chrome.contentSettings API 相关功能",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.contentSettings API 相关功能",
+        "default_popup": "pages/action.html"
+    },
+    "permissions": [
+        "contentSettings",
+        "tabs"
+    ]
+}

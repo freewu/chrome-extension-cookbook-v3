@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "替换 Chrome 网页",
+    "version": "1.0",
+    "description": "替换 Chrome 网页 newtab / history / bookmarks ",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+
+    "chrome_url_overrides": {
+        "newtab": "pages/newtab.html"
+    }
+}

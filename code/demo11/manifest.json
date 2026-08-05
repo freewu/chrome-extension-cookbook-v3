@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "数据存储 展示 (chrome.storage)",
+    "version": "1.0",
+    "description": "展示 chrome.storage API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_popup": "pages/action.html",
+        "default_title": "数据存储 展示 (chrome.storage)",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "storage"
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "name": "chrome.action 效果演示",
+    "description": "chrome.action 效果演示",
+    "version": "1.0",
+    "manifest_version": 3,
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_popup": "pages/action.html",
+        "default_icon": "images/icon.png",
+        "default_title": "chrome.action 效果演示"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "tabs"
+    ]
+}

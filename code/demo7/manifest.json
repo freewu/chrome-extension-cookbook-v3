@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "通知 展示 (chrome.notifications)",
+    "version": "1.0",
+    "description": "展示 chrome.notifications API basic / image / progress / list",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_title": "通知 展示 (chrome.notifications)",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "notifications"
+    ]
+}

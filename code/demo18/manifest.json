@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "阅读清单 展示 (chrome.readingList)",
+    "version": "1.0",
+    "description": "展示 chrome.readingList API 阅读清单",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.readingList API 阅读清单"
+    },
+    "permissions": [
+        "readingList"
+    ]
+}

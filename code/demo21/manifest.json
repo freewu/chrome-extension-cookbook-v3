@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "从用户的本地个人资料中移除浏览数据 (chrome.browsingData)",
+    "version": "1.0",
+    "description": "展示 chrome.browsingData API 相关功能",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.browsingData API 相关功能"
+    },
+    "permissions": [
+        "browsingData"
+    ]
+}

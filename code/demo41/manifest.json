@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "剪贴板 展示 (clipboard)",
+    "version": "1.0",
+    "description": "展示 clipboard API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 clipboard API",
+        "default_popup": "pages/action.html"
+    },
+    "permissions": [
+        "clipboardRead",
+        "clipboardWrite"
+    ]
+}

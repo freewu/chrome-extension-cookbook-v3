@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "管理安装式应用和扩展程序 展示 (chrome.management)",
+    "version": "1.0",
+    "description": "展示 chrome.management API",
+    "icons":
+    {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_icon": "images/icon.png",
+        "default_title": "展示 chrome.management API"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "management"
+    ]
+}
