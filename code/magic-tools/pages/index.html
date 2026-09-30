@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Magic Tools for Chrome</title>
+    <link rel="stylesheet" href="../css/app.css">
+
+    <!-- 第三方库（本地内置，MV3 不允许加载远程脚本） -->
+    <script src="../lib/crypto-js.min.js"></script>
+    <script src="../lib/sha3.min.js"></script>
+    <script src="../lib/sm2.js"></script>
+    <script src="../lib/sm3.js"></script>
+    <script src="../lib/sm4.js"></script>
+    <script src="../lib/bcrypt.min.js"></script>
+    <script src="../lib/scrypt.js"></script>
+    <script src="../lib/jsencrypt.min.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="../images/icon.png" alt="logo">
+                <div>
+                    <h1>Magic Tools</h1>
+                    <small>for Chrome</small>
+                </div>
+            </div>
+            <input id="search" class="search" type="search" placeholder="搜索工具…">
+            <nav id="category-nav"></nav>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <h2 id="tool-title">请选择一个工具</h2>
+                <span id="tool-category" class="tag"></span>
+            </header>
+            <section id="tool-list" class="tool-grid"></section>
+            <section id="tool-panel" class="tool-panel hidden"></section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/app.js"></script>
+</body>
+
+</html>
