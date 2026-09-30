@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "调试器 展示 (chrome.debugger)",
+    "version": "1.0",
+    "description": "展示 chrome.debugger API 作为 Chrome 远程调试协议 (CDP) 的替代传输方式",
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_popup": "pages/action.html",
+        "default_title": "调试器 展示 (chrome.debugger)",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "debugger",
+        "tabs"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ]
+}

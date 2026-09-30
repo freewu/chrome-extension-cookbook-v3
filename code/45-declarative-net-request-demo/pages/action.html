@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <title>chrome.declarativeNetRequest 展示</title>
+    <style>
+        body { width: 420px; font-family: system-ui, sans-serif; padding: 8px; }
+        button { margin: 2px; }
+        pre { background: #f5f5f5; padding: 8px; max-height: 220px; overflow: auto; }
+        label { display: block; margin-top: 6px; }
+    </style>
+</head>
+
+<body>
+    <h1>chrome.declarativeNetRequest</h1>
+
+    <h3>静态规则集</h3>
+    <button id="enable-ruleset">启用广告规则集</button>
+    <button id="disable-ruleset">停用广告规则集</button>
+    <button id="list-rulesets">查看已启用规则集</button>
+
+    <h3>动态规则</h3>
+    <label>屏蔽 URL 关键字：<input id="url-filter" value="||example-block.com"></label>
+    <button id="add-dynamic">添加动态屏蔽规则</button>
+    <button id="list-dynamic">查看动态规则</button>
+    <button id="clear-dynamic">清空动态规则</button>
+
+    <h3>测试匹配</h3>
+    <label>测试 URL：<input id="test-url" value="https://doubleclick.net/ad.js"></label>
+    <button id="test-match">testMatchOutcome</button>
+
+    <h3>结果</h3>
+    <pre id="result">等待操作...</pre>
+
+    <script src="../js/action.js"></script>
+</body>
+
+</html>

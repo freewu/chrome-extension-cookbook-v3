@@ -46,8 +46,17 @@
 * [可供任何扩展程序页面使用的实用程序 展示 (chrome.extension)](./42-extension-demo/Readme.md)    
 * [管理 Chrome 的代理设置  展示 (chrome.proxy)](./43-proxy-demo-demo/Readme.md)    
 * [文本转语音(TTS) 展示 (chrome.tts && chrome.ttsEngine)](./44-tts-demo/Readme.md)    
+* [***声明式网络请求 展示 (chrome.declarativeNetRequest)***](./45-declarative-net-request-demo/Readme.md)   
+* [***声明式内容 展示 (chrome.declarativeContent)***](./46-declarative-content-demo/Readme.md)   
+* [***调试器 展示 (chrome.debugger)***](./47-debugger-demo/Readme.md)   
+* [***身份验证 展示 (chrome.identity)***](./48-identity-demo/Readme.md)   
 * [***清单文件格式  (manifest.json)***](./manifest.md)    
 * [***权限  (permissions)***](./permissions.md)    
+
+
+## 实战项目
+
+* [Magic Tools for Chrome（编解码 / 加解密 / 值计算 工具箱）](./magic-tools/Readme.md)    
 
 
 ## 计划
@@ -68,15 +77,15 @@
 | contentSettings                    | demo22    | ✅️       | 使用模式来指定每项内容设置所影响的网站                                      |
 | contextMenus                       | demo3     | ✅️       | 右键菜单展示                                                           |
 | cookies                            | demo20    | ✅️       | 查询和修改 Cookie                                                      |
-| debugger                           |           | 未开始    | 作为 Chrome 远程调试协议的替代传输方式                                     |
-| declarativeContent                 |           | 未开始    | 根据网页内容执行操作，而无需读取网页内容的权限                               |
-| declarativeNetRequest              |           | 未开始    | 通过指定声明性规则来屏蔽或修改网络请求                                      |
+| debugger                           | demo47    | ✅️       | 作为 Chrome 远程调试协议的替代传输方式                                     |
+| declarativeContent                 | demo46    | ✅️       | 根据网页内容执行操作，而无需读取网页内容的权限                               |
+| declarativeNetRequest              | demo45    | ✅️       | 通过指定声明性规则来屏蔽或修改网络请求                                      |
 | desktopCapture                     | demo23    | ✅️       | 获屏幕、单个窗口或单个标签页的内容                                         |
-| devtools.inspectedWindow           | demo4     | 未开始    | 与当前选中的标签页进行交互，例如执行 JavaScript 代码或获取 DOM 元素           |
-| devtools.network                   | demo4     | 未开始    | 监控和分析网络请求，例如查看请求头、响应体和网络延迟等信息                      |
+| devtools.inspectedWindow           | demo4     | ✅️       | 与当前选中的标签页进行交互，例如执行 JavaScript 代码或获取 DOM 元素           |
+| devtools.network                   | demo4     | ✅️       | 监控和分析网络请求，例如查看请求头、响应体和网络延迟等信息                      |
 | devtools.panels                    | demo4     | ✅️       | 开发者工具展示                                                          |
-| devtools.performance               | demo4     | 未开始    | 分析和优化网页性能，例如测量页面加载时间、渲染时间和资源使用情况等信息            |
-| devtools.recorder                  | demo4     | 未开始    | 记录用户在浏览器中的操作，例如点击、滚动和输入文本等事件，以便后续分析和回放       |
+| devtools.performance               | demo4     | ✅️       | 分析和优化网页性能，例如测量页面加载时间、渲染时间和资源使用情况等信息            |
+| devtools.recorder                  | demo4     | ✅️       | 记录用户在浏览器中的操作，例如点击、滚动和输入文本等事件，以便后续分析和回放       |
 | dns                                |           | ❌️       | 仅在 Chrome Dev 中可用。目前没有将此 API 从开发渠道移至 Chrome 稳定版的计划   |
 | documentScan                       |           | ❌️       | 仅限 ChromeOS                                                         |
 | dom                                |           | ❌️       | 适用于扩展程序的特殊 DOM API (不知道怎么用，想到在写 demo)                  | 
@@ -93,13 +102,13 @@
 | fileBrowserHandler                 |           | ❌️       | 仅限 ChromeOS                                                          |
 | fileSystemProvider                 |           | ❌️       | 仅限 ChromeOS                                                          |
 | fontSettings                       | demo37    | ✅️       | 管理 Chrome 的字体设置                                                   |
-| gcm                                |           | 未开始    | 与 Google Cloud Messaging (GCM) 进行通信，用于发送和接收消息。              |
+| gcm                                |           | ❌️       | 服务已停用，改用 Web Push / Firebase Cloud Messaging                      |
 | history                            | demo29    | ✅️       | 管理用户的浏览器历史记录                                                   |
 | i18n                               | demo30    | ✅️       | 国际化                                                                  |
-| identity                           |           | 未开始    | 与用户身份验证和授权相关的 API，例如登录、注销和获取用户信息等。                 |
+| identity                           | demo48    | ✅️       | 与用户身份验证和授权相关的 API，例如登录、注销和获取用户信息等。                 |
 | idle                               | demo38    | ✅️       | 检测用户是否空闲，以及在用户空闲时执行操作。                                  |    
 | input.ime                          |           | ❌️       | 仅限 ChromeOS                                                          |
-| instanceID                         |           | 未开始    |                                                                        |
+| instanceID                         |           | ❌️       | 服务已停用（Instance ID / GCM 已移除）                                    |
 | loginState                         |           | ❌️       | 仅限 ChromeOS                                                          |
 | management                         | demo39    | ✅️       | 管理安装式应用和扩展程序                                                   |
 | notifications                      | demo7     | ✅️       | 通知展示                                                                |

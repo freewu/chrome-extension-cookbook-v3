@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <title>chrome.identity 展示</title>
+    <style>
+        body { width: 440px; font-family: system-ui, sans-serif; padding: 8px; }
+        button { margin: 2px; }
+        pre { background: #f5f5f5; padding: 8px; max-height: 260px; overflow: auto; }
+    </style>
+</head>
+
+<body>
+    <h1>chrome.identity</h1>
+
+    <h3>用户信息</h3>
+    <button id="profile">getProfileUserInfo()</button>
+
+    <h3>重定向 URL</h3>
+    <button id="redirect">getRedirectURL()</button>
+
+    <h3>Web 授权流程 (launchWebAuthFlow)</h3>
+    <button id="webauth">启动授权流程（httpbin 示例）</button>
+
+    <h3>缓存令牌</h3>
+    <button id="clear">clearAllCachedAuthTokens()</button>
+
+    <h3>结果</h3>
+    <pre id="result">等待操作...</pre>
+
+    <script src="../js/action.js"></script>
+</body>
+
+</html>

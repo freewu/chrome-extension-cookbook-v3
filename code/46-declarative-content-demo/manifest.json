@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "声明式内容 展示 (chrome.declarativeContent)",
+    "version": "1.0",
+    "description": "展示 chrome.declarativeContent API 根据网页内容执行操作，而无需读取网页内容的权限",
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_title": "声明式内容 展示 (chrome.declarativeContent)",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "declarativeContent",
+        "activeTab",
+        "scripting"
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "manifest_version": 3,
+    "name": "身份验证 展示 (chrome.identity)",
+    "version": "1.0",
+    "description": "展示 chrome.identity API 获取用户信息、OAuth 重定向 URL、Web 授权流程",
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_popup": "pages/action.html",
+        "default_title": "身份验证 展示 (chrome.identity)",
+        "default_icon": "images/icon.png"
+    },
+    "permissions": [
+        "identity",
+        "identity.email"
+    ]
+}

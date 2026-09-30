@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "声明式网络请求 展示 (chrome.declarativeNetRequest)",
+    "version": "1.0",
+    "description": "展示 chrome.declarativeNetRequest API 通过声明性规则屏蔽或修改网络请求",
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_popup": "pages/action.html",
+        "default_title": "声明式网络请求 展示 (chrome.declarativeNetRequest)",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "declarativeNetRequest",
+        "declarativeNetRequestFeedback"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "ruleset_block_ads",
+                "enabled": false,
+                "path": "rules/block-ads.json"
+            }
+        ]
+    }
+}
