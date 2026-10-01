@@ -1,0 +1,45 @@
+{
+    "manifest_version": 3,
+    "name": "LeetCode 助手",
+    "version": "1.0.0",
+    "description": "只在 leetcode.cn / leetcode.com 题目页生效，一键复制标题、题目内容（可去除 HTML 标签）与指定语言的代码模板。",
+    "icons": {
+        "16": "images/icon.png",
+        "48": "images/icon.png",
+        "128": "images/icon.png"
+    },
+    "action": {
+        "default_popup": "pages/popup.html",
+        "default_title": "LeetCode 助手",
+        "default_icon": "images/icon.png"
+    },
+    "background": {
+        "service_worker": "js/background.js"
+    },
+    "permissions": [
+        "tabs",
+        "storage",
+        "scripting",
+        "webNavigation"
+    ],
+    "host_permissions": [
+        "*://leetcode.cn/*",
+        "*://*.leetcode.cn/*",
+        "*://leetcode.com/*",
+        "*://*.leetcode.com/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "*://leetcode.cn/problems/*",
+                "*://*.leetcode.cn/problems/*",
+                "*://leetcode.com/problems/*",
+                "*://*.leetcode.com/problems/*"
+            ],
+            "js": [
+                "js/content.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
+}

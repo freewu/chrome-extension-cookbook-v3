@@ -1,0 +1,264 @@
+* {
+    box-sizing: border-box;
+}
+
+/* 当元素自身定义了 display 时，[hidden] 会失效，这里统一兜底 */
+[hidden] {
+    display: none !important;
+}
+
+body {
+    width: 420px;
+    margin: 0;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    font-size: 13px;
+    color: #1f2328;
+    background: #f6f8fa;
+}
+
+.header {
+    padding: 12px 16px;
+    color: #fff;
+    background: linear-gradient(135deg, #2cbb5d, #1a9c4a);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.header .subtitle {
+    margin: 4px 0 0;
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+.main {
+    padding: 12px;
+}
+
+/* 状态提示 */
+.state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    text-align: center;
+    color: #57606a;
+}
+
+.state--warn {
+    color: #9a6700;
+}
+
+.state--error {
+    color: #cf222e;
+    word-break: break-all;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d0d7de;
+    border-top-color: #2cbb5d;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 题目标题 */
+.problem {
+    margin-bottom: 10px;
+}
+
+.problem__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.tag {
+    flex: none;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #57606a;
+    background: #eaeef2;
+    border-radius: 10px;
+}
+
+.tag[data-level="easy"] {
+    color: #1a7f37;
+    background: #dafbe1;
+}
+
+.tag[data-level="medium"] {
+    color: #9a6700;
+    background: #fff8c5;
+}
+
+.tag[data-level="hard"] {
+    color: #cf222e;
+    background: #ffebe9;
+}
+
+/* 卡片 */
+.card {
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+}
+
+.card__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.card__name {
+    flex: none;
+    font-weight: 600;
+}
+
+.card__head .switch {
+    margin-left: auto;
+}
+
+.card__head .select {
+    margin-left: auto;
+    max-width: 150px;
+}
+
+.card__head .btn {
+    margin-left: auto;
+}
+
+.card__head .switch + .btn {
+    margin-left: 0;
+}
+
+.card__head .select + .btn {
+    margin-left: 0;
+}
+
+/* 控件 */
+.switch {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #57606a;
+    cursor: pointer;
+    user-select: none;
+}
+
+.select {
+    padding: 3px 6px;
+    font-size: 12px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #1f2328;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #eef1f4;
+}
+
+.btn--primary {
+    color: #fff;
+    background: #2cbb5d;
+    border-color: #2cbb5d;
+}
+
+.btn--primary:hover {
+    background: #27a753;
+}
+
+.btn--block {
+    width: 100%;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.actions {
+    margin-top: 4px;
+}
+
+/* 预览 */
+.preview {
+    max-height: 180px;
+    margin: 0;
+    padding: 10px;
+    overflow: auto;
+    font-size: 12px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+.preview--single {
+    max-height: none;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.preview--code {
+    background: #0d1117;
+    color: #e6edf3;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.78);
+    border-radius: 999px;
+    transform: translateX(-50%);
+    animation: fade 1.6s ease forwards;
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 6px);
+    }
+    15%,
+    75% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+    }
+}

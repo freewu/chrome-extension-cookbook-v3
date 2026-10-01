@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>LeetCode 助手</title>
+    <link rel="stylesheet" href="../css/popup.css">
+</head>
+<body>
+    <header class="header">
+        <h1>LeetCode 助手</h1>
+        <p class="subtitle">一键复制题目信息，仅在 leetcode.cn / leetcode.com 生效</p>
+    </header>
+
+    <main class="main">
+        <!-- 读取中 -->
+        <section id="loading" class="state">
+            <span class="spinner"></span>
+            正在读取题目…
+        </section>
+
+        <!-- 非 LeetCode 页面 -->
+        <section id="not-leetcode" class="state state--warn" hidden>
+            <strong>当前不是 LeetCode 题目页</strong>
+            <p>请打开 leetcode.cn 或 leetcode.com 上的某道算法题后再点击本扩展。</p>
+        </section>
+
+        <!-- 出错 -->
+        <section id="error" class="state state--error" hidden></section>
+
+        <!-- 正常界面 -->
+        <section id="workspace" hidden>
+            <div class="problem">
+                <div class="problem__title">
+                    <span id="problem-title"></span>
+                    <span id="difficulty" class="tag"></span>
+                </div>
+            </div>
+
+            <!-- 标题 -->
+            <div class="card">
+                <div class="card__head">
+                    <span class="card__name">标题</span>
+                    <button id="copy-title" class="btn btn--primary">复制标题</button>
+                </div>
+                <div id="title-preview" class="preview preview--single"></div>
+            </div>
+
+            <!-- 题目内容 -->
+            <div class="card">
+                <div class="card__head">
+                    <span class="card__name">题目内容</span>
+                    <label class="switch">
+                        <input type="checkbox" id="strip-html">
+                        <span>去除 HTML 标签</span>
+                    </label>
+                    <button id="copy-content" class="btn btn--primary">复制内容</button>
+                </div>
+                <pre id="content-preview" class="preview"></pre>
+            </div>
+
+            <!-- 实现方法 -->
+            <div class="card">
+                <div class="card__head">
+                    <span class="card__name">实现方法</span>
+                    <select id="lang-select" class="select"></select>
+                    <button id="copy-method" class="btn btn--primary">复制代码</button>
+                </div>
+                <pre id="code-preview" class="preview preview--code"></pre>
+            </div>
+
+            <div class="actions">
+                <button id="copy-all" class="btn btn--block">复制全部（Markdown）</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script type="module" src="../js/popup.js"></script>
+</body>
+</html>
