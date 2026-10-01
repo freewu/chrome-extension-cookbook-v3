@@ -48,10 +48,8 @@
                     continue;
                 }
                 if (tag === "IMG") {
-                    const alt = child.getAttribute("alt");
-                    if (alt) {
-                        out += alt;
-                    }
+                    // 保留 <img> 标签：题目里的示意图 / 公式图片不能丢
+                    out += child.outerHTML || "";
                     continue;
                 }
                 if (tag === "SUP") {
