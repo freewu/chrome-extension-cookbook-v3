@@ -146,9 +146,17 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(({ tabId, url }) => {
 
 ### 2. 题目内容 HTML -> 纯文本
 
-`题目内容（去除 HTML 标签）` 开关背后是一个递归转换函数：`<pre>` 原样保留缩进、`<li>` 转成列表、块级元素之间补换行，其余空白折叠：
+`题目内容（去除 HTML 标签）` 开关背后是一个递归转换函数：`<pre>` 原样保留缩进、`<li>` 转成列表、`<sup>` / `<sub>` 转成上/下标写法（`10<sup>9</sup>` -> `10^{9}`、`a<sub>i</sub>` -> `a_{i}`）、块级元素之间补换行，其余空白折叠：
 
 ```js
+if (tag === "SUP") {
+    out += "^{" + walk(child, listCtx).trim() + "}";
+    continue;
+}
+if (tag === "SUB") {
+    out += "_{" + walk(child, listCtx).trim() + "}";
+    continue;
+}
 if (tag === "PRE") {
     out += "\n" + (child.textContent || "").replace(/^\n+|\n+$/g, "") + "\n";
     continue;

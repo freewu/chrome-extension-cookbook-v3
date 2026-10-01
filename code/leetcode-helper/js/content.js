@@ -54,6 +54,16 @@
                     }
                     continue;
                 }
+                if (tag === "SUP") {
+                    // 上标转成 Markdown/LaTeX 风格：10<sup>9</sup> -> 10^{9}
+                    out += "^{" + walk(child, listCtx).trim() + "}";
+                    continue;
+                }
+                if (tag === "SUB") {
+                    // 下标同理：a<sub>i</sub> -> a_{i}
+                    out += "_{" + walk(child, listCtx).trim() + "}";
+                    continue;
+                }
                 if (tag === "LI") {
                     const marker = listCtx && listCtx.ordered ? `${listCtx.index++}. ` : "- ";
                     out += "\n" + marker + walk(child, listCtx).trim() + "\n";

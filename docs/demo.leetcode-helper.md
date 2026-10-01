@@ -213,7 +213,7 @@ DOM 里的标题和内容一定是最新的，缺点是没有代码模板。
 ## 六、HTML 转纯文本
 
 「去除 HTML 标签」不是简单地把标签删掉，而是尽量保留可读的排版：
-`<pre>` 里的代码要保留缩进，`<li>` 要变成列表，段落之间要有空行。
+`<pre>` 里的代码要保留缩进，`<li>` 要变成列表，`<sup>` / `<sub>` 要转成上/下标（`10<sup>9</sup>` -> `10^{9}`），段落之间要有空行。
 
 ```js
 function htmlToText(html) {
@@ -229,6 +229,14 @@ function htmlToText(html) {
             }
             const tag = child.tagName;
             if (tag === "BR") { out += "\n"; continue; }
+            if (tag === "SUP") {                      // 上标 -> ^{}
+                out += "^{" + walk(child, listCtx).trim() + "}";
+                continue;
+            }
+            if (tag === "SUB") {                      // 下标 -> _{}
+                out += "_{" + walk(child, listCtx).trim() + "}";
+                continue;
+            }
             if (tag === "PRE") {                       // 代码块：原样保留
                 out += "\n" + child.textContent.trim() + "\n";
                 continue;
