@@ -1,9 +1,15 @@
 # LeetCode 助手 实战
 
-> 一个只在 `leetcode.cn` / `leetcode.com` 题目页生效的扩展。
+> 一个只在 `leetcode.cn` / `leetcode.com` 题目页（含**竞赛题目**）生效的扩展。
 >
 > 打开某道算法题后，点击工具栏图标即可一键复制：
 > **标题**、**题目内容（可切换是否去除 HTML 标签）**、**实现方法（可切换编程语言）**，以及一键复制的 Markdown 全文。
+
+支持的页面：
+
+- 普通题目：`https://leetcode.cn/problems/two-sum/`
+- 竞赛题目：`https://leetcode.cn/contest/biweekly-contest-123/problems/two-sum/`
+  （周赛 `weekly-contest-*`、双周赛 `biweekly-contest-*` 均支持）
 
 ## 功能
 
@@ -64,8 +70,12 @@ leetcode-helper
             "matches": [
                 "*://leetcode.cn/problems/*",
                 "*://*.leetcode.cn/problems/*",
+                "*://leetcode.cn/contest/*",
+                "*://*.leetcode.cn/contest/*",
                 "*://leetcode.com/problems/*",
-                "*://*.leetcode.com/problems/*"
+                "*://*.leetcode.com/problems/*",
+                "*://leetcode.com/contest/*",
+                "*://*.leetcode.com/contest/*"
             ],
             "js": ["js/content.js"],
             "run_at": "document_idle"
@@ -73,6 +83,9 @@ leetcode-helper
     ]
 }
 ```
+
+> `contest/*` 这条匹配规则是为了支持竞赛题目：竞赛题的 URL 形如
+> `/contest/biweekly-contest-123/problems/two-sum/`，不在 `/problems/*` 下。
 
 ### 权限说明
 
@@ -84,9 +97,42 @@ leetcode-helper
 | `scripting` | 内容脚本未注入时（如扩展刚安装）兜底手动注入 |
 | `webNavigation` | LeetCode 是单页应用，用它监听 `history.pushState` 触发的站内跳转 |
 
+## 支持的页面
+
+内容脚本用一段逻辑解析 URL，同时覆盖普通题目页与竞赛题目页：
+
+```js
+// js/content.js
+function getContext() {
+    const pathname = location.pathname;
+
+    const contestProblem = pathname.match(/^\/contest\/([^/]+)\/problems\/([^/]+)/);
+    if (contestProblem) {
+        return { slug: contestProblem[2], contest: contestProblem[1] };
+    }
+
+    const problem = pathname.match(/^\/problems\/([^/]+)/);
+    if (problem) {
+        return { slug: problem[1], contest: "" };
+    }
+
+    const contestList = pathname.match(/^\/contest\/([^/]+)\/problems\/?$/);
+    if (contestList) {
+        return { slug: "", contest: contestList[1] };
+    }
+
+    return { slug: "", contest: "" };
+}
+```
+
+- `/problems/<slug>/` → 普通题目；
+- `/contest/<contest>/problems/<slug>/` → 竞赛题目，`contest` 字段会在「复制全部」的 Markdown 里标出竞赛名；
+- `/contest/<contest>/problems` → 竞赛题目**列表页**，此时还没有具体题目，弹窗会提示「请先点进具体题目」。
+
 ## 数据来源
 
-内容脚本按以下优先级抓取数据，逐级兜底：
+内容脚本先解析当前 URL 得到题目 `slug`（普通题目取 `/problems/<slug>`，竞赛题目取
+`/contest/<contest>/problems/<slug>`），再按以下优先级抓取数据，逐级兜底：
 
 1. **官方 GraphQL**（首选，最新最全）
 
@@ -203,7 +249,8 @@ var twoSum = function (nums, target) {
 
 1. 打开 `chrome://extensions` 并开启「开发者模式」。
 2. 点击「加载已解压的扩展程序」，选择本目录（包含 `manifest.json` 的目录）。
-3. 打开任意一道题，例如 https://leetcode.cn/problems/two-sum/ 。
+3. 打开任意一道题，例如 https://leetcode.cn/problems/two-sum/ ；
+   竞赛题同理，例如 https://leetcode.cn/contest/biweekly-contest-123/problems/ ；
 4. 点击工具栏的 LeetCode 助手图标，按需切换语言、勾选是否去除 HTML 标签，点击对应按钮复制。
 
 ## 说明

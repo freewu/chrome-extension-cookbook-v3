@@ -15,9 +15,29 @@
 
     // ---------------- 通用工具 ----------------
 
-    function getSlug() {
-        const match = location.pathname.match(/\/problems\/([^/]+)/);
-        return match ? match[1] : "";
+    // 解析当前页面所在的题目上下文，支持普通题目页与竞赛题目页：
+    //   /problems/<slug>/                             -> 普通题目
+    //   /contest/<contest>/problems/<slug>/           -> 竞赛题目（如 biweekly-contest-123）
+    //   /contest/<contest>/problems                   -> 竞赛题目列表页（还没有具体题目）
+    function getContext() {
+        const pathname = location.pathname;
+
+        const contestProblem = pathname.match(/^\/contest\/([^/]+)\/problems\/([^/]+)/);
+        if (contestProblem) {
+            return { slug: contestProblem[2], contest: contestProblem[1] };
+        }
+
+        const problem = pathname.match(/^\/problems\/([^/]+)/);
+        if (problem) {
+            return { slug: problem[1], contest: "" };
+        }
+
+        const contestList = pathname.match(/^\/contest\/([^/]+)\/problems\/?$/);
+        if (contestList) {
+            return { slug: "", contest: contestList[1] };
+        }
+
+        return { slug: "", contest: "" };
     }
 
     // 把题目内容 HTML 转成可读纯文本（保留代码块缩进与列表）
@@ -203,8 +223,11 @@
     // ---------------- 汇总 ----------------
 
     async function collect() {
-        const slug = getSlug();
+        const { slug, contest } = getContext();
         if (!slug) {
+            if (contest) {
+                return { ok: false, error: `当前是竞赛「${contest}」的题目列表页，请先点进具体题目` };
+            }
             return { ok: false, error: "当前页面不是 LeetCode 题目页" };
         }
 
@@ -244,6 +267,7 @@
             ok: true,
             data: {
                 slug,
+                contest,
                 url: location.href,
                 frontendId,
                 title,

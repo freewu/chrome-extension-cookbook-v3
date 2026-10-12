@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "LeetCode 助手",
     "version": "1.0.0",
-    "description": "只在 leetcode.cn / leetcode.com 题目页生效，一键复制标题、题目内容（可去除 HTML 标签）与指定语言的代码模板。",
+    "description": "只在 leetcode.cn / leetcode.com 题目页（含竞赛题目）生效，一键复制标题、题目内容（可去除 HTML 标签）与指定语言的代码模板。",
     "icons": {
         "16": "images/icon.png",
         "48": "images/icon.png",
@@ -33,8 +33,12 @@
             "matches": [
                 "*://leetcode.cn/problems/*",
                 "*://*.leetcode.cn/problems/*",
+                "*://leetcode.cn/contest/*",
+                "*://*.leetcode.cn/contest/*",
                 "*://leetcode.com/problems/*",
-                "*://*.leetcode.com/problems/*"
+                "*://*.leetcode.com/problems/*",
+                "*://leetcode.com/contest/*",
+                "*://*.leetcode.com/contest/*"
             ],
             "js": [
                 "js/content.js"

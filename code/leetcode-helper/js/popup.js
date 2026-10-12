@@ -42,8 +42,9 @@ const state = {
 // -------------------- 基础工具 --------------------
 
 function isLeetCode(url) {
-    // 必须是 LeetCode 题目页，例如 https://leetcode.cn/problems/two-sum/
-    return /^https?:\/\/([a-z0-9-]+\.)*leetcode\.(cn|com)\/problems\//i.test(url || "");
+    // 题目页：/problems/<slug>/，或竞赛题目页 /contest/<contest>/problems[/<slug>/]
+    // 例如 https://leetcode.cn/contest/biweekly-contest-123/problems/two-sum/
+    return /^https?:\/\/([a-z0-9-]+\.)*leetcode\.(cn|com)\/(?:problems\/|contest\/[^/]+\/problems)/i.test(url || "");
 }
 
 function show(section) {
@@ -181,6 +182,9 @@ function buildAll() {
     lines.push("");
 
     const meta = [];
+    if (d.contest) {
+        meta.push(`竞赛：${d.contest}`);
+    }
     if (d.difficulty) {
         meta.push(`难度：${difficultyLabel(d.difficulty)}`);
     }

@@ -1,7 +1,7 @@
 # LeetCode 助手 实战
 
 前面几章都在讲单个 `chrome.*` API，这一章我们做一个更贴近日常的完整小项目：一个
-**只在 `leetcode.cn` / `leetcode.com` 题目页生效**的「LeetCode 助手」扩展。
+**只在 `leetcode.cn` / `leetcode.com` 题目页（含竞赛题目）生效**的「LeetCode 助手」扩展。
 
 打开任意一道算法题，点击工具栏图标，就能一键复制：
 
@@ -82,8 +82,12 @@ leetcode-helper
             "matches": [
                 "*://leetcode.cn/problems/*",
                 "*://*.leetcode.cn/problems/*",
+                "*://leetcode.cn/contest/*",
+                "*://*.leetcode.cn/contest/*",
                 "*://leetcode.com/problems/*",
-                "*://*.leetcode.com/problems/*"
+                "*://*.leetcode.com/problems/*",
+                "*://leetcode.com/contest/*",
+                "*://*.leetcode.com/contest/*"
             ],
             "js": ["js/content.js"],
             "run_at": "document_idle"
@@ -100,7 +104,12 @@ leetcode-helper
 | `scripting` | 内容脚本没注入成功时兜底手动注入 |
 | `webNavigation` | 监听单页应用的 `history.pushState` 跳转 |
 
-注意 `content_scripts.matches` 只写了 `/problems/*`，也就是说**内容脚本只会注入到题目页**。
+注意 `content_scripts.matches` 只写了题目相关路径，也就是说**内容脚本只会注入到题目页**：
+
+- `/problems/*`：普通题目页，如 https://leetcode.cn/problems/two-sum/ ；
+- `/contest/*`：竞赛页面。竞赛题的 URL 形如
+  https://leetcode.cn/contest/biweekly-contest-123/problems/two-sum/ ，
+  它**不在** `/problems/*` 下，所以必须额外声明 `contest/*`，否则在竞赛里点开题目时内容脚本不会注入。
 
 ## 四、只在 LeetCode 生效
 
@@ -143,6 +152,41 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(({ tabId, url }) => {
 ## 五、抓取题目数据
 
 这是整个项目最核心的部分。题目数据有三个来源，逐级兜底。
+
+### 0. 先从 URL 解析题目 slug（兼容竞赛题）
+
+普通题目和竞赛题目的 URL 结构不同，所以先写一个 `getContext()` 统一解析：
+
+```js
+// js/content.js
+function getContext() {
+    const pathname = location.pathname;
+
+    // 竞赛题目：/contest/biweekly-contest-123/problems/two-sum/
+    const contestProblem = pathname.match(/^\/contest\/([^/]+)\/problems\/([^/]+)/);
+    if (contestProblem) {
+        return { slug: contestProblem[2], contest: contestProblem[1] };
+    }
+
+    // 普通题目：/problems/two-sum/
+    const problem = pathname.match(/^\/problems\/([^/]+)/);
+    if (problem) {
+        return { slug: problem[1], contest: "" };
+    }
+
+    // 竞赛题目列表页：/contest/biweekly-contest-123/problems（还没有具体题目）
+    const contestList = pathname.match(/^\/contest\/([^/]+)\/problems\/?$/);
+    if (contestList) {
+        return { slug: "", contest: contestList[1] };
+    }
+
+    return { slug: "", contest: "" };
+}
+```
+
+拿到 `slug` 后，下面的 GraphQL / `__NEXT_DATA__` / DOM 三级兜底都复用同一套代码；
+竞赛题目的 `slug`（如 `two-sum`）与普通题目一致，因此 GraphQL 查询也能直接命中。
+只有在线赛期间可能需要登录态，这正是同源请求带 Cookie 的好处。
 
 ### 1. 官方 GraphQL（首选）
 
@@ -325,14 +369,17 @@ var twoSum = function (nums, target) {
 
 1. 打开 `chrome://extensions`，开启「开发者模式」；
 2. 点击「加载已解压的扩展程序」，选择 `code/leetcode-helper` 目录；
-3. 打开 https://leetcode.cn/problems/two-sum/ ；
-4. 点击工具栏图标，切换语言、勾选是否去除 HTML 标签，点击按钮复制。
+3. 打开任意一道题，比如 https://leetcode.cn/problems/two-sum/ ；
+4. 竞赛题同理，比如 https://leetcode.cn/contest/biweekly-contest-123/problems/ ，
+   点进具体题目后点击图标即可复制；
+5. 点击工具栏图标，切换语言、勾选是否去除 HTML 标签，点击按钮复制。
 
 ## 十、小结
 
 这个小项目把几个关键点串了起来：
 
 - 用 `content_scripts.matches` + `action.enable/disable` 把扩展的影响范围收敛到目标站点；
+- 用一段 `getContext()` 同时兼容普通题目页与竞赛题目页；
 - 用 `webNavigation` 处理单页应用的站内跳转；
 - 内容脚本发起**同源请求**复用页面的登录态（Cookie / CSRF），拿到官方接口数据；
 - 用「接口 -> 内嵌数据 -> DOM」三级兜底保证健壮性；
