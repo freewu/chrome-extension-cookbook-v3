@@ -30,7 +30,11 @@ json-viewer
 ├── Readme.md
 ├── manifest.json          // 清单文件 (MV3)
 ├── images
-│   └── icon.png           // 扩展图标
+│   ├── logo.png         // 图标源文件 (256×256)
+│   ├── icon16.png       // 工具栏图标
+│   ├── icon32.png
+│   ├── icon48.png       // 扩展管理页图标
+│   └── icon128.png      // 商店 / 安装弹窗图标
 ├── css
 │   └── viewer.css         // 浮层 + 树 + 主题 + 搜索高亮 样式
 └── js
@@ -52,9 +56,20 @@ json-viewer
     "manifest_version": 3,
     "name": "JSON Viewer",
     "version": "1.0.0",
+    "icons": {
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
     "action": {
         "default_title": "JSON Viewer：切换 格式化 / 原始 视图",
-        "default_icon": "images/icon.png"
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        }
     },
     "background": {
         "service_worker": "js/background.js"

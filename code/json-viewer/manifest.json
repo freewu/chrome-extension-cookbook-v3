@@ -4,13 +4,19 @@
     "version": "1.0.0",
     "description": "自动识别 JSON 格式的页面，格式化成带语法高亮、可树形折叠的视图，支持搜索、复制与原始视图切换。",
     "icons": {
-        "16": "images/icon.png",
-        "48": "images/icon.png",
-        "128": "images/icon.png"
+        "16": "images/icon16.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
     },
     "action": {
         "default_title": "JSON Viewer：切换 格式化 / 原始 视图",
-        "default_icon": "images/icon.png"
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        }
     },
     "background": {
         "service_worker": "js/background.js"
