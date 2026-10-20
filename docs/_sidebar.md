@@ -74,3 +74,4 @@
 - 实战项目
     * [Magic Tools for Chrome](./demo.magic-tools.md "Magic Tools for Chrome")
     * [LeetCode 助手](./demo.leetcode-helper.md "LeetCode 助手")
+    * [JSON Viewer](./demo.json-viewer.md "JSON Viewer")

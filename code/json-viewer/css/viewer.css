@@ -1,0 +1,422 @@
+/**
+ * ============================================================================
+ * JSON Viewer —— 样式（css/viewer.css）
+ * ============================================================================
+ *
+ * 这份样式会注入到**所有页面**，所以：
+ *   1. 所有类名统一用 `jv-` 前缀，绝不会命中页面自身的元素；
+ *   2. 颜色、字号全部挂在 `.jv-app` 上，避免受页面 body 样式影响；
+ *   3. 折叠 / 展开完全靠 CSS 类切换（`.jv-node.is-collapsed`），
+ *      不重建 DOM，所以「展开全部 / 折叠全部」几乎瞬间完成。
+ * ============================================================================
+ */
+
+/* ---------------------------------------------------------------------------
+ * 一、主题变量
+ *    浅色是默认值，深色由 `.jv-app.is-dark` 覆盖（JS 按用户偏好 / 系统设置加类）。
+ * ------------------------------------------------------------------------- */
+.jv-app {
+    /* 基础色 */
+    --jv-bg: #ffffff;
+    --jv-panel: #f6f8fa;
+    --jv-fg: #24292f;
+    --jv-border: #d0d7de;
+    --jv-hover: #eef2f6;
+    /* 语法高亮色 */
+    --jv-key: #0550ae;
+    --jv-string: #0a7d32;
+    --jv-number: #b35900;
+    --jv-boolean: #8250df;
+    --jv-null: #cf222e;
+    --jv-punc: #57606a;
+    --jv-meta: #8b949e;
+    /* 搜索命中色 */
+    --jv-hit-bg: #fff8c5;
+    --jv-hit-current-bg: #ffd33d;
+    /* 提示横幅 */
+    --jv-banner-bg: #ffebe9;
+    --jv-banner-fg: #cf222e;
+    /* 每层缩进宽度（JS 会改这个变量） */
+    --jv-indent: 16px;
+}
+
+.jv-app.is-dark {
+    --jv-bg: #1f2430;
+    --jv-panel: #171b24;
+    --jv-fg: #c9d1d9;
+    --jv-border: #30363d;
+    --jv-hover: #2b3242;
+    --jv-key: #79c0ff;
+    --jv-string: #7ee787;
+    --jv-number: #ffa657;
+    --jv-boolean: #d2a8ff;
+    --jv-null: #ff7b72;
+    --jv-punc: #8b949e;
+    --jv-meta: #6e7681;
+    --jv-hit-bg: #4a4100;
+    --jv-hit-current-bg: #7a6300;
+    --jv-banner-bg: #3b1b1b;
+    --jv-banner-fg: #ff7b72;
+}
+
+/* ---------------------------------------------------------------------------
+ * 二、全屏浮层
+ *    用 position: fixed 盖住整个视口，页面原本的 <pre> 保持不动，
+ *    所以「关闭」只需要把自己 remove 掉，页面立刻恢复原样。
+ * ------------------------------------------------------------------------- */
+.jv-app {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647; /* 尽可能压在页面所有内容之上 */
+    display: flex;
+    flex-direction: column;
+    background: var(--jv-bg);
+    color: var(--jv-fg);
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    text-align: left;
+    letter-spacing: normal;
+}
+
+.jv-app,
+.jv-app * {
+    box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------------
+ * 三、工具栏
+ * ------------------------------------------------------------------------- */
+.jv-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 8px 12px;
+    flex: 0 0 auto;
+    background: var(--jv-panel);
+    border-bottom: 1px solid var(--jv-border);
+}
+
+.jv-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.jv-logo {
+    color: var(--jv-key);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.jv-brand-text {
+    font-weight: 600;
+}
+
+.jv-status {
+    color: var(--jv-meta);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 42vw;
+}
+
+.jv-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto; /* 按钮组尽量靠右 */
+}
+
+/* 普通按钮 */
+.jv-btn {
+    padding: 3px 10px;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--jv-fg);
+    background: var(--jv-bg);
+    border: 1px solid var(--jv-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.jv-btn:hover:not(:disabled) {
+    background: var(--jv-hover);
+}
+
+.jv-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* 搜索框里的 ↑ / ↓ 小按钮 */
+.jv-btn--icon {
+    padding: 3px 7px;
+}
+
+/* 「缩进」下拉框 */
+.jv-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--jv-meta);
+}
+
+.jv-field-label {
+    white-space: nowrap;
+}
+
+.jv-select {
+    padding: 2px 4px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--jv-fg);
+    background: var(--jv-bg);
+    border: 1px solid var(--jv-border);
+    border-radius: 6px;
+}
+
+/* 搜索框 */
+.jv-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 2px;
+    flex: 1 1 220px;
+    max-width: 360px;
+}
+
+.jv-search-input {
+    flex: 1 1 auto;
+    min-width: 120px;
+    padding: 3px 8px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--jv-fg);
+    background: var(--jv-bg);
+    border: 1px solid var(--jv-border);
+    border-radius: 6px;
+    outline: none;
+}
+
+.jv-search-input:focus {
+    border-color: var(--jv-key);
+    box-shadow: 0 0 0 2px rgba(5, 80, 174, 0.15);
+}
+
+.jv-search-input:disabled {
+    opacity: 0.45;
+}
+
+.jv-search-count {
+    font-size: 12px;
+    color: var(--jv-meta);
+    min-width: 44px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+ * 四、提示横幅（JSON 解析失败时）
+ * ------------------------------------------------------------------------- */
+.jv-banner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px;
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: var(--jv-banner-fg);
+    background: var(--jv-banner-bg);
+    border-bottom: 1px solid var(--jv-border);
+}
+
+.jv-banner em {
+    font-style: normal;
+    opacity: 0.8;
+}
+
+/* ---------------------------------------------------------------------------
+ * 五、内容区（可滚动）
+ * ------------------------------------------------------------------------- */
+.jv-content {
+    flex: 1 1 auto;
+    overflow: auto;
+    /* 底部多留一点空白，最后几行也能滚动到视口中间，方便搜索定位 */
+    padding: 10px 16px 40vh;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* 原始文本视图 */
+.jv-raw {
+    margin: 0;
+    font: inherit;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--jv-fg);
+}
+
+/* ---------------------------------------------------------------------------
+ * 六、树
+ * ------------------------------------------------------------------------- */
+.jv-tree {
+    white-space: pre-wrap;
+    word-break: break-word;
+    tab-size: 4;
+}
+
+/* 一个节点 = 头部行 + 子节点容器 + 结束行 */
+.jv-node {
+    position: relative;
+}
+
+/* 一行：箭头 + 键名 + 冒号 + 括号 + 值 ...... */
+.jv-row {
+    display: flex;
+    align-items: flex-start;
+    border-radius: 4px;
+    padding-left: 2px;
+}
+
+.jv-row:hover {
+    background: var(--jv-hover);
+}
+
+/* 子节点容器：靠 padding-left 实现缩进，宽度由 CSS 变量 --jv-indent 决定 */
+.jv-children {
+    padding-left: var(--jv-indent);
+}
+
+/* 折叠：隐藏子节点和结束行 */
+.jv-node.is-collapsed > .jv-children,
+.jv-node.is-collapsed > .jv-row--close {
+    display: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * 七、折叠箭头
+ * ------------------------------------------------------------------------- */
+.jv-toggle {
+    flex: 0 0 auto;
+    width: 14px;
+    color: var(--jv-meta);
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* 基础值 / 空容器的箭头位置只占位，不可点 */
+.jv-toggle--empty {
+    cursor: default;
+}
+
+.jv-toggle:not(.jv-toggle--empty):hover {
+    color: var(--jv-fg);
+}
+
+/* ---------------------------------------------------------------------------
+ * 八、语法高亮
+ * ------------------------------------------------------------------------- */
+.jv-key {
+    color: var(--jv-key);
+}
+
+.jv-string {
+    color: var(--jv-string);
+}
+
+.jv-number {
+    color: var(--jv-number);
+}
+
+.jv-boolean {
+    color: var(--jv-boolean);
+}
+
+.jv-null {
+    color: var(--jv-null);
+}
+
+.jv-punc,
+.jv-bracket {
+    color: var(--jv-punc);
+}
+
+/* 展开时的「3 个键」「5 项」 */
+.jv-meta {
+    color: var(--jv-meta);
+    font-size: 12px;
+    padding-left: 6px;
+    user-select: none;
+}
+
+/* 折叠时的摘要「{…} 3 个键」，默认隐藏，折叠时才出现 */
+.jv-summary {
+    display: none;
+    color: var(--jv-meta);
+    padding-left: 4px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.jv-summary:hover {
+    color: var(--jv-fg);
+    text-decoration: underline;
+}
+
+/* 展开状态下隐藏「折叠摘要」和「头部行里的逗号」；
+ * 折叠状态下隐藏「展开说明」——逗号和摘要各显示一份，保证视觉上仍然像合法 JSON。 */
+.jv-node:not(.is-collapsed) > .jv-row > .jv-summary,
+.jv-node:not(.is-collapsed) > .jv-row > .jv-comma--collapsed {
+    display: none;
+}
+
+.jv-node.is-collapsed > .jv-row > .jv-meta {
+    display: none;
+}
+
+.jv-node.is-collapsed > .jv-row > .jv-summary {
+    display: inline;
+}
+
+/* 超长字符串（被截断）加个虚线下划线，提示可点击展开 */
+.jv-string--cut {
+    border-bottom: 1px dashed currentColor;
+    cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------------
+ * 九、搜索高亮
+ * ------------------------------------------------------------------------- */
+.jv-row.jv-hit {
+    background: var(--jv-hit-bg);
+}
+
+.jv-row.jv-hit--current {
+    background: var(--jv-hit-current-bg);
+    outline: 1px solid var(--jv-border);
+}
+
+/* ---------------------------------------------------------------------------
+ * 十、滚动条（浅色 / 深色都保持低调）
+ * ------------------------------------------------------------------------- */
+.jv-content::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.jv-content::-webkit-scrollbar-thumb {
+    background: var(--jv-border);
+    border-radius: 6px;
+}
+
+.jv-content::-webkit-scrollbar-thumb:hover {
+    background: var(--jv-meta);
+}
