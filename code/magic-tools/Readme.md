@@ -79,22 +79,30 @@
 ```markdown
 magic-tools
 ├── Readme.md
-├── manifest.json          // 清单文件 (MV3)
+├── manifest.json              // 清单文件 (MV3)
 ├── images
-│   └── icon.png           // 扩展图标
+│   └── icon.png               // 扩展图标
 ├── pages
-│   └── index.html         // 工具主界面(整页)
+│   ├── index.html             // 工具箱首页：分类导航 + 搜索 + 工具卡片
+│   ├── home.js                // 首页逻辑：按 registry 渲染导航与卡片
+│   └── app                    // 工具页，一个目录 = 一个工具
+│       ├── registry.js        // 工具清单：动态 import 各目录的 tool.js
+│       ├── shared             // 公共代码
+│       │   ├── page.js        // 工具页外壳：按 fields 渲染表单 / 执行 / 复制
+│       │   ├── utils.js       // 通用工具：字节/Hex/Base64/任意进制/CRC/DOM 帮手
+│       │   ├── crypto-common.js    // 加解密分类共享 helper
+│       │   └── valuecalc-common.js // 值计算分类共享 helper
+│       ├── base64
+│       │   ├── index.html     // 工具页(只放一个容器 + 引入 tool.js)
+│       │   └── tool.js        // 工具定义：id/name/category/desc/fields/run
+│       ├── aes
+│       │   └── ...            // 同上，每个工具一个目录
+│       └── ...                // 共 50 个工具目录
 ├── css
-│   └── app.css            // 界面样式
+│   └── app.css                // 界面样式
 ├── js
-│   ├── background.js      // service worker：点击图标打开/聚焦主界面
-│   ├── app.js             // 界面逻辑：分类导航、搜索、表单、结果渲染
-│   └── utils.js           // 通用工具：字节/Hex/Base64/任意进制/CRC/DOM 帮手
-├── tools
-│   ├── codec.js           // 编解码工具集(每个工具是一个描述对象)
-│   ├── crypto.js          // 加解密工具集
-│   └── valuecalc.js       // 值计算工具集
-└── lib                    // 第三方库(本地内置，MV3 不允许加载远程脚本)
+│   └── background.js          // service worker：点击图标打开/聚焦首页
+└── lib                        // 第三方库(本地内置，MV3 不允许加载远程脚本)
     ├── crypto-js.min.js
     ├── sha3.min.js
     ├── sm2.js / sm3.js / sm4.js
@@ -142,11 +150,12 @@ magic-tools
 
 ## 技术要点
 
-### 1. 工具即数据
+### 1. 工具即数据，一个目录一个工具
 
-每个工具都是一个普通对象，界面与执行逻辑完全解耦：
+每个工具都放在 `pages/app/<工具id>/` 下，目录里只有两个文件：`tool.js`（工具定义）与 `index.html`（工具页）。
 
 ```js
+// pages/app/base64/tool.js
 const base64Tool = {
     id: "base64",
     name: "Base64 编解码",
@@ -162,23 +171,56 @@ const base64Tool = {
         return v.mode === "encode" ? encode(v.input) : decode(v.input);
     },
 };
+
+export default base64Tool;
+mountTool(base64Tool); // 工具页里有 #tool-page 容器时自动挂载
 ```
 
-`js/app.js` 负责：
+工具页 `index.html` 只留一个容器，其余交给 `tool.js`：
 
-- 汇总 `codecTools / cryptoTools / valueCalcTools` 三个数组；
+```html
+<main class="main">
+    <div id="tool-page"></div>
+</main>
+<script type="module" src="./tool.js"></script>
+```
+
+`pages/app/shared/page.js` 的 `mountTool()` 负责：
+
 - 根据 `fields` 声明自动生成表单（text / textarea / select / checkbox）；
-- 调用 `tool.run(values)` 并把结果（字符串或对象）渲染成带「复制」按钮的结果块。
+- 调用 `tool.run(values)` 并把结果（字符串或对象）渲染成带「复制」按钮的结果块；
+- 渲染标题、分类标签、`← 返回工具箱` 链接。
 
-### 2. MV3 下使用本地第三方库
+首页则通过 `pages/app/registry.js` 汇总所有工具：
 
-Manifest V3 的内容安全策略（CSP）不允许加载远程脚本，因此 `crypto-js`、`jsencrypt`、`sm2` / `sm3` / `sm4` 等库都以本地文件形式放在 `lib/` 下，由 `pages/index.html` 通过 `<script>` 引入，再用 `window.CryptoJS` 等方式访问；只有 ESM 版本的 `blowfish.mjs` 通过 `import` 使用。
+```js
+// pages/app/registry.js
+export const TOOL_DIRS = [
+    "base64", "base58", /* ... */,
+];
 
-### 3. ES Modules
+export const ALL_TOOLS = await Promise.all(
+    TOOL_DIRS.map(async (dir) => (await import(`./${dir}/tool.js`)).default),
+);
+```
 
-界面逻辑使用原生 ES Module（`<script type="module">` + `import` / `export`），`tools/*.js` 默认导出工具数组，`js/app.js` 负责组装。
+`mountTool()` 在没有 `#tool-page` 容器时直接 return，所以首页批量 import 各个 `tool.js` 不会产生任何副作用。
 
-### 4. Service Worker 与图标点击
+### 2. 分类共享代码放在 shared/
+
+同一分类里被多个工具复用的 helper（例如 AES / DES / RC4 共用的 `symmetricFields()`、`runCryptoJs()`）集中在 `pages/app/shared/crypto-common.js`、`valuecalc-common.js`，各工具目录按需 `import`，避免每个工具各写一份。
+
+### 3. MV3 下使用本地第三方库
+
+Manifest V3 的内容安全策略（CSP）不允许加载远程脚本，因此 `crypto-js`、`jsencrypt`、`sm2` / `sm3` / `sm4` 等库都以本地文件形式放在 `lib/` 下，由页面用 `<script>` 引入，再用 `window.CryptoJS` 等方式访问；只有 ESM 版本的 `blowfish.mjs` 通过 `import` 使用。
+
+每个工具页只引入自己需要的库（例如 Base64 页不加载 crypto-js），首页为了方便批量 `import`，会把全部库都先加载好。
+
+### 4. ES Modules
+
+界面逻辑使用原生 ES Module（`<script type="module">` + `import` / `export`），每个 `tool.js` 默认导出单个工具对象，`registry.js` 用动态 `import()` 汇总。
+
+### 5. Service Worker 与图标点击
 
 ```js
 chrome.action.onClicked.addListener(async () => {
@@ -195,10 +237,12 @@ chrome.action.onClicked.addListener(async () => {
 
 ## 如何新增一个工具
 
-1. 在 `tools/` 对应文件中新增一个工具对象（或在合适的分类下新建文件）。
-2. 声明 `id / name / category / desc / fields / run`。
-3. 若新建了文件，在 `js/app.js` 中 `import` 并把数组加入 `ALL_TOOLS`。
-4. 重新加载扩展即可看到新工具。
+1. 新建目录 `pages/app/<工具id>/`；
+2. 写 `tool.js`：声明 `id / name / category / desc / fields / run`，末尾 `export default` + `mountTool(tool)`；
+3. 复制一份 `index.html`（改标题即可），保证里面引入了需要的第三方库；
+4. 在 `pages/app/registry.js` 的 `TOOL_DIRS` 中登记目录名；
+5. 多个工具共用的 helper 放到 `pages/app/shared/` 下，不要复制粘贴；
+6. 重新加载扩展，首页就会出现新卡片，点击进入独立页面。
 
 ## 资料
 

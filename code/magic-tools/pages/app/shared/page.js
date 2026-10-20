@@ -1,73 +1,14 @@
+// 工具页外壳：把「工具定义」渲染成表单 + 执行结果
+// 每个工具目录（pages/app/<id>/tool.js）末尾都会调用 mountTool(tool)
 import { el } from "./utils.js";
-import codecTools from "../tools/codec.js";
-import cryptoTools from "../tools/crypto.js";
-import valueCalcTools from "../tools/valuecalc.js";
 
-const CATEGORIES = {
+export const CATEGORIES = {
     codec: { label: "编解码", desc: "Base64 / URL / Unicode / 摩斯码 等" },
     crypto: { label: "加解密", desc: "AES / RSA / SM4 / 古典密码 等" },
-    "value-calc": { label: "值计算", desc: "Hash / CRC / HMAC / 进制 等" },
+    "value-calc": { label: "值计算", desc: "Hash / CRC / HMAC / 派生函数 等" },
 };
 
-const ALL_TOOLS = [...codecTools, ...cryptoTools, ...valueCalcTools];
-const byId = new Map(ALL_TOOLS.map((t) => [t.id, t]));
-
-const navEl = document.getElementById("category-nav");
-const listEl = document.getElementById("tool-list");
-const panelEl = document.getElementById("tool-panel");
-const titleEl = document.getElementById("tool-title");
-const catEl = document.getElementById("tool-category");
-const searchEl = document.getElementById("search");
-
-let currentCategory = "codec";
-
-function renderNav() {
-    navEl.innerHTML = "";
-    for (const [key, meta] of Object.entries(CATEGORIES)) {
-        const a = el("a", {
-            text: meta.label,
-            class: key === currentCategory ? "active" : "",
-            onclick: () => {
-                currentCategory = key;
-                showList();
-            },
-        });
-        navEl.append(a);
-    }
-}
-
-function showList(keyword = "") {
-    renderNav();
-    panelEl.classList.add("hidden");
-    listEl.classList.remove("hidden");
-    catEl.textContent = CATEGORIES[currentCategory]?.label ?? "";
-    titleEl.textContent = CATEGORIES[currentCategory]?.label ?? "工具列表";
-
-    const tools = ALL_TOOLS.filter(
-        (t) =>
-            (keyword ? true : t.category === currentCategory) &&
-            (!keyword ||
-                t.name.toLowerCase().includes(keyword) ||
-                t.id.toLowerCase().includes(keyword))
-    );
-
-    listEl.innerHTML = "";
-    if (tools.length === 0) {
-        listEl.append(el("p", { text: "没有匹配的工具" }));
-        return;
-    }
-    for (const tool of tools) {
-        const card = el("div", {
-            class: "tool-card",
-            onclick: () => showTool(tool.id),
-        }, [
-            el("div", { class: "name", text: tool.name }),
-            el("div", { class: "desc", text: tool.desc || "" }),
-        ]);
-        listEl.append(card);
-    }
-}
-
+// 按字段描述创建表单控件
 function buildField(field, valueSetter) {
     const wrap = el("div", { class: "field" });
     const label = el("label", { text: field.label });
@@ -123,22 +64,31 @@ function renderOutput(output) {
     return box;
 }
 
-function showTool(id) {
-    const tool = byId.get(id);
-    if (!tool) return;
+/**
+ * 挂载一个工具。
+ * 工具定义只需要关心「有哪些字段」和「怎么算」：
+ *   { id, name, category, desc, actionText?, fields: [...], run(values) }
+ */
+export function mountTool(tool) {
+    const root = document.getElementById("tool-page");
+    // 首页（pages/index.html）会用 registry.js 批量 import 各个 tool.js，
+    // 那里没有 #tool-page 容器，因此直接跳过
+    if (!root) return;
 
-    listEl.classList.add("hidden");
-    panelEl.classList.remove("hidden");
-    titleEl.textContent = tool.name;
-    catEl.textContent = CATEGORIES[tool.category]?.label ?? "";
+    const cat = CATEGORIES[tool.category];
+    document.title = `${tool.name} · Magic Tools`;
 
-    panelEl.innerHTML = "";
-    const back = el("button", { class: "back", text: "← 返回列表", onclick: () => showList(searchEl.value.trim()) });
-    panelEl.append(back);
+    root.append(el("a", { class: "back", href: "../../index.html", text: "← 返回工具箱" }));
+    root.append(
+        el("div", { class: "topbar" }, [
+            el("h2", { text: tool.name }),
+            cat ? el("span", { class: "tag", text: cat.label }) : null,
+        ].filter(Boolean))
+    );
+    if (tool.desc) root.append(el("p", { class: "tool-desc", text: tool.desc }));
 
-    if (tool.description) {
-        panelEl.append(el("p", { class: "desc", text: tool.description }));
-    }
+    const panel = el("div", { class: "tool-panel" });
+    root.append(panel);
 
     const values = {};
     const getters = {};
@@ -146,18 +96,18 @@ function showTool(id) {
         const { wrap, get } = buildField(field, (v) => {
             values[field.name] = v;
         });
-        values[field.name] = field.type === "checkbox" ? !!field.default : (field.default ?? "");
+        values[field.name] = field.type === "checkbox" ? !!field.default : field.default ?? "";
         getters[field.name] = get;
-        panelEl.append(wrap);
+        panel.append(wrap);
     }
 
     const actions = el("div", { class: "actions" });
     const runBtn = el("button", { class: "btn", text: tool.actionText || "执行" });
     actions.append(runBtn);
-    panelEl.append(actions);
+    panel.append(actions);
 
     const resultArea = el("div");
-    panelEl.append(resultArea);
+    panel.append(resultArea);
 
     runBtn.addEventListener("click", async () => {
         for (const [name, get] of Object.entries(getters)) {
@@ -183,15 +133,3 @@ function showTool(id) {
         }
     });
 }
-
-searchEl.addEventListener("input", () => {
-    const kw = searchEl.value.trim().toLowerCase();
-    if (kw) {
-        currentCategory = currentCategory;
-        showList(kw);
-    } else {
-        showList();
-    }
-});
-
-showList();
