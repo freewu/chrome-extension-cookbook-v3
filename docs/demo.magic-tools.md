@@ -1,7 +1,7 @@
 # Magic Tools for Chrome 实战
 
 前面章节都是围绕某个 `chrome.*` API 的示例，这一章我们做一个完整的小项目：一个纯前端的
-「编解码 / 加解密 / 值计算」工具箱扩展。
+「类型转换 / 编解码 / 加解密 / 值计算」工具箱扩展。
 
 它不依赖任何后端，所有计算都在浏览器本地完成；点击工具栏图标后在新标签页打开界面，
 左侧按分类浏览或搜索工具，右侧填参数执行，结果一键复制。
@@ -10,17 +10,18 @@
 
 ## 一、先看效果与功能
 
-扩展一共内置 50 个工具，分为三类：
+扩展一共内置 70 个工具，目前实现了四个分类（界面预留了 9 个分类，方便后续扩充）：
 
 | 分类 | 包含的工具 |
 | ---- | ---------- |
+| 类型转换 `convert` | 面积、距离、速度、容量、重量、字节、温度、进制、颜色、时间、IP、经纬度、GPS 坐标、人民币大写、拼音、树形路径、配置文件、JSONL、字幕格式、下载链接 |
 | 编解码 `codec` | Base64、Base58、BaseX、BCD、HTTP Basic Auth、Gzip、JWT、摩斯码、Punycode、URL、UUencode、XXencode、Unicode |
 | 加解密 `crypto` | AES、DES、3DES、RC4、Rabbit、Blowfish、SM2、SM4、SM9、RSA、凯撒、维吉尼亚、栅栏、希尔、Cisco Type 7、TEA、XTEA、XXTEA、RC5、RC6、RC2、ChaCha20 |
 | 值计算 `value-calc` | Hash、HmacHash、SHA3、Keccak、KMAC、CMAC、CRC、BCC、LRC、原码/反码/补码、HKDF、PBKDF2、BCrypt、Scrypt、PPI |
 
 ## 二、目录结构
 
-这本书里的项目都尽量贴近真实工程。工具箱一共 50 个工具，如果全塞进一个 `app.js`，
+这本书里的项目都尽量贴近真实工程。工具箱一共 70 个工具，如果全塞进一个 `app.js`，
 文件很快就会变成几千行。所以这里采用和主流前端项目一样的做法：**一个工具一个目录**。
 
 ```markdown
@@ -39,13 +40,16 @@ magic-tools
 │       │   ├── page.js         // 工具页外壳：表单渲染 / 执行 / 复制
 │       │   ├── utils.js        // 字节/Hex/Base64/任意进制/CRC/DOM 帮手
 │       │   ├── crypto-common.js
-│       │   └── valuecalc-common.js
+│       │   ├── valuecalc-common.js
+│       │   ├── unitconv.js     // 单位换算工厂：unitTool() / temperatureTool()
+│       │   ├── color.js        // 颜色空间转换与配色方案
+│       │   └── config.js       // 配置文件解析/序列化
 │       ├── base64
 │       │   ├── index.html      // 工具页：一个容器 + 引入 tool.js
 │       │   └── tool.js         // 工具定义：id/name/category/desc/fields/run
 │       ├── aes/
 │       ├── rsa/
-│       └── ...                 // 共 50 个目录
+│       └── ...                 // 共 70 个目录
 └── lib                         // 第三方库（本地内置，MV3 不允许远程脚本）
 ```
 
@@ -147,7 +151,7 @@ mountTool(base64Tool);
 ```js
 // pages/app/registry.js
 export const TOOL_DIRS = [
-    "base64", "base58", "basex", /* ... 50 个目录名 ... */
+    "area-convert", "base64", "base58", /* ... 70 个目录名 ... */
 ];
 
 export const ALL_TOOLS = await Promise.all(
@@ -164,7 +168,7 @@ el("a", { class: "tool-card", href: `./app/${tool.id}/index.html` }, [
 ]);
 ```
 
-> 首页会 `import` 全部 50 个 `tool.js`，所以 `mountTool()` 里要先判断 `#tool-page` 是否存在，
+> 首页会 `import` 全部 70 个 `tool.js`，所以 `mountTool()` 里要先判断 `#tool-page` 是否存在，
 > 不存在就直接 return —— 避免在首页重复渲染工具界面。
 
 ### 3. 分类内共享的 helper
@@ -195,7 +199,93 @@ const aesTool = {
 };
 ```
 
-## 五、动态表单与结果渲染
+## 五、类型转换分类的三类写法
+
+「类型转换」这 20 个工具的实现方式差异很大，正好能把几种常见模式都走一遍。
+
+### 1. 单位换算：数据表 + 工厂
+
+面积 / 距离 / 速度 / 容量 / 重量 / 字节 六个工具的结构完全一样：
+选一个输入单位、填一个数字、把结果换算到其他所有单位。这类工具不需要写六遍，
+而是把「单位表」抽成数据，把流程抽成工厂函数：
+
+```js
+// pages/app/shared/unitconv.js
+export function unitTool(config) {
+    const { units, base, defaultUnit, defaultValue = "1" } = config;
+    return {
+        ...config,
+        fields: [
+            { name: "unit", label: "输入单位", type: "select",
+              options: units.map(([id, label]) => [id, label]), default: defaultUnit },
+            { name: "value", label: "数值", type: "text", default: defaultValue },
+            { name: "scope", label: "输出范围", type: "select",
+              options: [["all", "全部单位"], ["same", "同类别"]] },
+        ],
+        run(v) {
+            const input = parseNumber(v.value);                 // 兼容全角、千分位
+            const from = factorOf(units.find((u) => u[0] === v.unit)[2]);
+            const inBase = input * from;                        // 先归一到基准单位
+            const out = {};
+            for (const [id, label, factor] of units) {
+                out[`${label} (${id})`] = fmtNumber(inBase / factorOf(factor));
+            }
+            return out;
+        },
+    };
+}
+```
+
+于是「面积转换」只剩一张表：
+
+```js
+// pages/app/area-convert/tool.js
+import { unitTool } from "../shared/unitconv.js";
+
+const tool = unitTool({
+    id: "area-convert",
+    name: "面积转换",
+    category: "convert",
+    desc: "公制 / 英制 / 市制 / 日式面积单位互转（以平方米为基准）",
+    base: "m2",
+    defaultUnit: "m2",
+    units: [
+        ["km2", "平方公里 km²", [1000000, 1]],
+        ["m2", "平方米 m²", [1, 1]],
+        ["ha", "公顷 ha", [10000, 1]],
+        ["mu", "亩", [1000, 15]],
+        // ...
+    ],
+});
+```
+
+两个小细节：
+
+1. **系数写成 `[分子, 分母]`（或 `{ mul, div }`）而不是小数**。像「亩」这种 1 亩 = 1000/15 m² 的单位
+   写成分数，乘除之后再把结果四舍五入到 12 位有效数字，比先转成 `66.6666666667` 再算准得多。
+2. **数字格式化统一走 `fmtNumber()`**：12 位有效数字、去掉末尾多余的 0、过大（≥1e15）
+   或过小（<1e-9）自动转科学计数法。否则换算到平方千米时页面上会出现一长串 `0.0000010000000000000002`。
+
+温度不能这样算——它不是「乘一个系数」的关系，所以单独写了一个 `temperatureTool()`，
+把所有温标先换成摄氏度、再按目标温标的公式算出去。
+
+### 2. 纯文本解析：逻辑内联在 `tool.js`
+
+经纬度、IP、字幕、配置文件这些工具没有第二个工具复用它们的代码，所以按「只被一个工具使用就内联」的约定，
+直接写在各自的 `tool.js` 里。几个值得说的点：
+
+- **进制转换用 `BigInt`**。`Number` 只有 53 位整数精度，超过就会静默丢位；`BigInt` 支持任意长度，
+  逐位 `value * radix + digit` 累加即可，输出时按 4 位一组插空格。
+- **颜色转换不要急着装库**。`shared/color.js` 里用 sRGB 伽马校正 + D65 白点的标准公式实现了
+  RGB / HSL / HSV / CMYK / XYZ / LAB / LCH 之间的互转，一共一百多行，还省掉一个依赖。
+  这里踩过一个坑：LAB 的 `f(t)` 已经是对白点归一化后的值，**不要再乘 100**，否则会得到 `lab(7540.07, ...)` 这种离谱结果。
+- **配置文件：能借就借，不能借就写**。JSON / JSON5 / YAML / TOML 用 `lib/` 下的本地库；
+  INI 和 Properties 各写四十行就够了；XML 解析直接用浏览器自带的 `DOMParser`（`parsererror` 节点判断语法错误），
+  输出则手写一个几十行的 `buildElement()`，比引入 `fast-xml-parser` 轻便。
+- **先猜格式再解析**。所有转换类工具都有「自动识别」选项，依据是内容特征（`WEBVTT` 头、`[Script Info]`、
+  `{1}{1}25.000`、`[00:12.34]`、首字符是 `[` / `{` / `<` 等）。识别错的时候，用户还能手动选。
+
+## 六、动态表单与结果渲染
 
 ### 1. 根据 `field.type` 生成控件
 
@@ -237,13 +327,14 @@ runBtn.addEventListener("click", async () => {
 });
 ```
 
-`renderOutput()` 把结果放进 `<pre>` 并附带一个「复制」按钮（`navigator.clipboard.writeText`）。
+`renderOutput()` 把结果放进 `<pre>` 并附带一个「复制」按钮（`navigator.clipboard.writeText`）；
+如果结果是一个 `Blob` 或 data URL（图片类工具会用到），则会额外渲染一个预览图和下载链接。
 
 ### 3. 分类导航与搜索
 
 顶部的搜索框会在**所有**工具里按 `name` / `id` 过滤；不输入关键字时只展示当前分类的工具。
 
-## 六、MV3 下如何使用第三方加密库
+## 七、MV3 下如何使用第三方库
 
 Manifest V3 的 CSP 不允许加载远程脚本，因此所有第三方库都必须**下载到本地**再通过
 `<script>` 引入。每个工具页只引自己需要的库：
@@ -259,7 +350,7 @@ Manifest V3 的 CSP 不允许加载远程脚本，因此所有第三方库都必
 <script src="../../../lib/jsencrypt.min.js"></script>
 ```
 
-首页因为要批量 `import` 全部工具，所以把 8 个库都先加载好：
+首页因为要批量 `import` 全部工具，所以把「每个工具都会用到」的加解密库先加载好：
 
 ```html
 <!-- pages/index.html -->
@@ -279,6 +370,21 @@ Manifest V3 的 CSP 不允许加载远程脚本，因此所有第三方库都必
 const C = window.CryptoJS;   // AES / DES / 3DES / RC4 / Rabbit / Hash ...
 ```
 
+只被个别工具用到的库不必挂在首页，写在各自工具页里即可（例如拼音转换只引 `pinyin-pro`，
+配置文件转换只引 `json5` + `toml-patch`），这样首页加载的脚本数量不会随着工具变多而无限增长：
+
+```html
+<!-- pages/app/config-convert/index.html -->
+<script src="../../../lib/json5.min.js"></script>
+<script src="../../../lib/toml-patch.min.js"></script>
+```
+
+```js
+// pages/app/config-convert/tool.js（库挂到全局，用法和 crypto-js 一样）
+window.JSON5.parse(src);
+window.TOML.parse(src);
+```
+
 > 小坑：`lib/sha3.min.js` 并没有提供一个 `window.sha3` 命名空间对象，而是把 `sha3_256`、
 > `keccak256`、`kmac128` 等函数**直接挂到 `window` 上**。所以应该写 `const S = window;`，
 > 而不是 `const S = window.sha3;`。
@@ -290,13 +396,24 @@ Blowfish 只有 ESM 版本，则通过 `import` 使用（注意相对路径要�
 import { Blowfish } from "../../../lib/blowfish.mjs";
 ```
 
+YAML 的官方包浏览器版本同样只提供 ES Module（`lib/yaml/` 整个目录），所以在 `shared/config.js` 里静态引入，
+用到它的工具页再间接拿到：
+
+```js
+// pages/app/shared/config.js
+import { parse as yamlParse, stringify as yamlStringify } from "../../../lib/yaml/index.js";
+```
+
+> 另一个坑：`lib/toml-patch.min.js` 只挂了一个全局 `TOML`，而 `pinyin-pro` 挂的是 `window.pinyinPro`。
+> 引入第三方库后最好先在控制台 `console.log(window)` 确认它到底往全局挂的是什么名字。
+
 界面逻辑本身使用原生 ES Module（模块脚本必须写在一个单独的文件里，内联模块会被 CSP 拦截）：
 
 ```html
 <script type="module" src="./tool.js"></script>
 ```
 
-## 七、如何新增一个工具
+## 八、如何新增一个工具
 
 1. 新建目录 `pages/app/<工具id>/`；
 2. 写 `tool.js`：声明 `id / name / category / desc / fields / run`，末尾 `export default` + `mountTool(tool)`；
@@ -326,12 +443,13 @@ mountTool(reverseTool);
 再去 `pages/app/registry.js` 加一行 `"reverse",`，首页就会出现这张卡片，
 点进去就是 `pages/app/reverse/index.html` 这个独立页面。
 
-## 八、小结
+## 九、小结
 
 这个小项目串起了几个在真实扩展里很常见的做法：
 
 - 用 `action.onClicked` + `tabs` 权限管理一个整页应用；
 - 用「一个目录一个工具 + 数据描述 + 动态渲染」的方式减少重复 UI 代码；
+- 把同构的工具（单位换算）抽象成「工厂 + 数据表」，把异构的工具写成独立脚本；
 - 在 MV3 的 CSP 约束下正确地引入本地第三方库；
 - 使用原生 ES Module（静态 `import` + 动态 `import()`）组织代码。
 

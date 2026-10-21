@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Magic Tools for Chrome",
     "version": "1.0.0",
-    "description": "编解码 / 加解密 / 值计算 三大类工具箱，点击扩展图标进入。",
+    "description": "类型转换 / 编解码 / 加解密 / 值计算 四大类工具箱，点击扩展图标进入。",
     "icons": {
         "16": "images/icon.png",
         "48": "images/icon.png",

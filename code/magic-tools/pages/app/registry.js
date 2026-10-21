@@ -1,6 +1,27 @@
 // 工具清单：pages/app/ 下每个目录就是一个工具，首页靠这张表把工具列出来。
 // 新增工具时：新建目录 → 在里面写 tool.js + index.html → 在下面的 TOOL_DIRS 里加一行。
 export const TOOL_DIRS = [
+    // 类型转换
+    "area-convert",
+    "distance-convert",
+    "speed-convert",
+    "volume-convert",
+    "weight-convert",
+    "byte-convert",
+    "temperature-convert",
+    "number-convert",
+    "color-convert",
+    "time",
+    "ip-convert",
+    "latlng-convert",
+    "gps-convert",
+    "rmb-convert",
+    "pinyin-convert",
+    "tree-path-convert",
+    "config-convert",
+    "jsonl-convert",
+    "subtitle-convert",
+    "download-link-convert",
     // 编解码
     "base64",
     "base58",
