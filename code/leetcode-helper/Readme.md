@@ -3,7 +3,7 @@
 > 一个只在 `leetcode.cn` / `leetcode.com` 题目页（含**竞赛题目**）生效的扩展。
 >
 > 打开某道算法题后，点击工具栏图标即可一键复制：
-> **标题**、**题目内容（可切换是否去除 HTML 标签）**、**实现方法（可切换编程语言）**，以及一键复制的 Markdown 全文。
+> **标题**、**题目内容（可切换是否去除 HTML 标签）**、**相关标签**、**提示**、**实现方法（可切换编程语言）**，以及一键复制的 Markdown 全文。
 
 支持的页面：
 
@@ -17,8 +17,10 @@
 | ---- | ---- |
 | 复制标题 | 复制形如 `1. 两数之和` 的标题（自动带上题号） |
 | 复制题目内容 | 支持开关「去除 HTML 标签」：关闭时复制原始 HTML，开启时复制可读纯文本（`<img>` 图片标签会保留） |
+| 复制标签 | 复制该题的相关标签（如 `数组 哈希表`），中文站取翻译名，英文站取原名 |
+| 复制提示 | 复制官方提示（Hints）；多个提示自动编号，单个提示直接输出纯文本 |
 | 复制实现方法 | 从下拉框选择语言（C++ / Java / Python3 / JavaScript / Go … 最多 20 种），复制该语言的代码模板 |
-| 复制全部 | 组装成一段 Markdown（标题 + 难度 + 链接 + 题目描述 + 代码块），方便粘贴到笔记或丢给 AI |
+| 复制全部 | 组装成一段 Markdown（标题 + 难度 + 标签 + 链接 + 题目描述 + 提示 + 代码块），方便粘贴到笔记或丢给 AI |
 
 只有在 LeetCode 题目页，工具栏图标才是可用状态；其他网站图标会被禁用。
 
@@ -136,7 +138,7 @@ function getContext() {
 
 1. **官方 GraphQL**（首选，最新最全）
 
-   在题目页发起同源请求 `POST /graphql/`，查询 `question` 的 `title / translatedTitle / difficulty / content / translatedContent / codeSnippets`。
+   在题目页发起同源请求 `POST /graphql/`，查询 `question` 的 `title / translatedTitle / difficulty / content / translatedContent / codeSnippets / topicTags / hints`。
    同源请求会自动携带 Cookie，若页面存在 `csrftoken` 则一并带上：
 
    ```js
@@ -158,8 +160,9 @@ function getContext() {
 
 3. **直接读取 DOM**
 
-   标题取 `div.text-title-large a`，内容取 `[data-track-load="description_content"]`。
-   这两个一定是最新的，缺点是拿不到代码模板。
+   标题取 `div.text-title-large a`，内容取 `[data-track-load="description_content"]`，
+   标签取题目底部指向 `/tag` 或 `topicSlugs=` 的链接（去重后最多 15 个）。
+   这几种数据一定是最新的，缺点是拿不到代码模板，也拿不到「提示」（提示只在懒加载弹层里出现）。
 
 ## 关键代码
 
@@ -225,16 +228,51 @@ if (tag === "LI") {
 下拉框的默认值优先级为：**上次选择 > 页面当前语言（`localStorage.global_lang`）> 默认 `javascript` > 第一项**，
 选择结果写入 `chrome.storage.sync`，下次自动恢复。
 
-### 4. 复制全部（Markdown）
+### 4. 相关标签与提示
+
+两者都写在同一份 GraphQL 查询里，但放在可选的 `extras` 片段中：万一某个站点版本的 schema
+没有 `topicTags` / `hints` 字段，整条查询会报错，这时会降级重试一次「只要核心字段」的查询，
+至少保住标题 / 内容 / 代码模板：
+
+```js
+const extras = withExtras
+    ? `
+        topicTags { name slug translatedName }
+        hints`
+    : "";
+```
+
+返回的数据需要先归一化再交给弹窗：
+
+- `topicTags` 是 `[{ name, slug, translatedName }]`，中文站优先取 `translatedName`（如「哈希表」），
+  英文站优先取 `name`（如 `Hash Table`），最后去重；
+- `hints` 是 **HTML 字符串数组**，复用 `htmlToText()` 转成纯文本，顺便处理个別站点把它塞成 JSON 字符串的情况。
+
+```js
+const graphTags = normalizeTags(question && question.topicTags, preferZh);
+const tags = graphTags.length ? graphTags : dom.tags || [];
+const hints = normalizeHints(question && question.hints);
+```
+
+标签额外做了一个 DOM 兜底：题目描述下方会把标签渲染成链接，去重后最多取 15 个；
+提示没有 DOM 兜底（页面上只有折叠的「提示」按钮，内容懒加载，不可靠），
+拿不到时弹窗会显示「（该题未提供提示）」。
+
+### 5. 复制全部（Markdown）
 
 ````markdown
 # 1. 两数之和
 
-难度：简单　|　链接：https://leetcode.cn/problems/two-sum/
+难度：简单　|　标签：数组 哈希表　|　链接：https://leetcode.cn/problems/two-sum/
 
 ## 题目描述
 
 给定一个整数数组 nums 和一个整数目标值 target……
+
+## 提示
+
+1. 你可以假设每种输入只会对应一个答案。
+2. 你可以按任意顺序返回答案。
 
 ## 实现方法（JavaScript）
 
@@ -251,11 +289,12 @@ var twoSum = function (nums, target) {
 2. 点击「加载已解压的扩展程序」，选择本目录（包含 `manifest.json` 的目录）。
 3. 打开任意一道题，例如 https://leetcode.cn/problems/two-sum/ ；
    竞赛题同理，例如 https://leetcode.cn/contest/biweekly-contest-123/problems/ ；
-4. 点击工具栏的 LeetCode 助手图标，按需切换语言、勾选是否去除 HTML 标签，点击对应按钮复制。
+4. 点击工具栏的 LeetCode 助手图标，按需切换语言、勾选是否去除 HTML 标签，复制标题 / 内容 / 标签 / 提示 / 代码，或直接「复制全部」。
 
 ## 说明
 
 - 代码模板来自题目自带的 `codeSnippets`（即「实现方法」的函数骨架），不是题解文章；题解文章需要登录且多数为付费内容，未纳入。
+- 标签 / 提示来自 GraphQL 的 `topicTags` / `hints`；若 GraphQL 失败回退到 DOM，只能拿到标签，提示会为空。
 - 若 GraphQL 因网络问题失败，会自动回退到页面内嵌数据或 DOM，此时可能拿不到代码模板。
 - 单页应用站内切题后，标题 / 内容会实时更新；代码模板依赖 GraphQL 保证最新。
 

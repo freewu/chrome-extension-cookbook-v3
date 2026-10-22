@@ -12,10 +12,14 @@ const els = {
     titlePreview: el("title-preview"),
     stripHtml: el("strip-html"),
     contentPreview: el("content-preview"),
+    tagsPreview: el("tags-preview"),
+    hintsPreview: el("hints-preview"),
     langSelect: el("lang-select"),
     codePreview: el("code-preview"),
     copyTitle: el("copy-title"),
     copyContent: el("copy-content"),
+    copyTags: el("copy-tags"),
+    copyHints: el("copy-hints"),
     copyMethod: el("copy-method"),
     copyAll: el("copy-all"),
     toast: el("toast")
@@ -128,6 +132,53 @@ function currentSnippet() {
     return state.data.codeSnippets.find((item) => item.langSlug === state.langSlug) || null;
 }
 
+function currentTags() {
+    return Array.isArray(state.data.tags) ? state.data.tags : [];
+}
+
+function currentHints() {
+    return Array.isArray(state.data.hints) ? state.data.hints : [];
+}
+
+// 标签用空格连接，粘贴到笔记 / 搜索框里都方便
+function tagsText() {
+    return currentTags().join(" ");
+}
+
+// 单个提示直接输出；多个提示带上序号
+function hintsText() {
+    const hints = currentHints();
+    if (hints.length <= 1) {
+        return hints[0] || "";
+    }
+    return hints.map((hint, index) => `${index + 1}. ${hint}`).join("\n");
+}
+
+function renderTags() {
+    const tags = currentTags();
+    els.tagsPreview.textContent = "";
+
+    if (!tags.length) {
+        els.tagsPreview.textContent = "（该题未提供标签）";
+        els.tagsPreview.classList.add("preview--empty");
+        return;
+    }
+
+    els.tagsPreview.classList.remove("preview--empty");
+    for (const tag of tags) {
+        const chip = document.createElement("span");
+        chip.className = "tag-chip";
+        chip.textContent = tag;
+        els.tagsPreview.appendChild(chip);
+    }
+}
+
+function renderHints() {
+    const hints = currentHints();
+    els.hintsPreview.textContent = hints.length ? hintsText() : "（该题未提供提示）";
+    els.hintsPreview.classList.toggle("preview--empty", !hints.length);
+}
+
 function renderLanguages() {
     const snippets = state.data.codeSnippets;
     els.langSelect.innerHTML = "";
@@ -167,6 +218,8 @@ function renderWorkspace() {
     els.difficulty.dataset.level = (d.difficulty || "").toLowerCase();
 
     renderLanguages();
+    renderTags();
+    renderHints();
     renderPreviews();
     show(els.workspace);
 }
@@ -188,6 +241,9 @@ function buildAll() {
     if (d.difficulty) {
         meta.push(`难度：${difficultyLabel(d.difficulty)}`);
     }
+    if (currentTags().length) {
+        meta.push(`标签：${tagsText()}`);
+    }
     meta.push(`链接：${d.url}`);
     lines.push(meta.join("　|　"));
     lines.push("");
@@ -196,6 +252,13 @@ function buildAll() {
     lines.push("");
     lines.push(currentContent());
     lines.push("");
+
+    if (currentHints().length) {
+        lines.push("## 提示");
+        lines.push("");
+        lines.push(hintsText());
+        lines.push("");
+    }
 
     if (snippet) {
         lines.push(`## 实现方法（${snippet.lang}）`);
@@ -225,6 +288,10 @@ function bindEvents() {
 
     els.copyTitle.addEventListener("click", () => copy(displayTitle(), "标题"));
     els.copyContent.addEventListener("click", () => copy(currentContent(), "题目内容"));
+
+    els.copyTags.addEventListener("click", () => copy(tagsText(), "标签"));
+
+    els.copyHints.addEventListener("click", () => copy(hintsText(), "提示"));
 
     els.copyMethod.addEventListener("click", () => {
         const snippet = currentSnippet();

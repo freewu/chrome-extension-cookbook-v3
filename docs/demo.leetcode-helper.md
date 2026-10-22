@@ -7,6 +7,8 @@
 
 - **标题**（自动带上题号）
 - **题目内容**（可切换是否去除 HTML 标签）
+- **相关标签**（如「数组 / 哈希表」，中文站自动取翻译名）
+- **提示**（官方 Hints，多个提示自动编号）
 - **实现方法**（可切换编程语言，复制对应语言的代码模板）
 - **全部内容**（组装成一段 Markdown）
 
@@ -27,6 +29,12 @@
 │ └────────────────────────────────────────┘ │
 │ ┌ 题目内容 ── ☑去除HTML标签 ─ [复制内容] ─┐ │
 │ │ 给定一个整数数组 nums 和一个整数目标值…    │ │
+│ └────────────────────────────────────────┘ │
+│ ┌ 相关标签 ─────────────── [复制标签] ──┐ │
+│ │ (数组) (哈希表)                          │ │
+│ └────────────────────────────────────────┘ │
+│ ┌ 提示 ───────────────── [复制提示] ──┐ │
+│ │ 1. 你可以假设每种输入只会对应一个答案。  │ │
 │ └────────────────────────────────────────┘ │
 │ ┌ 实现方法 ── [JavaScript ▾] ─ [复制代码] ┐ │
 │ │ var twoSum = function (nums, target) {  │ │
@@ -201,6 +209,8 @@ async function fetchByGraphQL(slug) {
             questionFrontendId title translatedTitle difficulty
             content translatedContent
             codeSnippets { lang langSlug code }
+            topicTags { name slug translatedName }
+            hints
         }
     }`;
     const csrf = (document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/) || [])[1];
@@ -226,6 +236,18 @@ async function fetchByGraphQL(slug) {
 
 ```js
 { lang: "Python3", langSlug: "python3", code: "class Solution:\n    def twoSum(...):" }
+```
+
+`topicTags` / `hints` 则分别对应「相关标签」与「提示」（详细处理见第七节「标签与提示」）。
+它们放在一个可选的 `extras` 片段里：万一某个站点版本的 schema 没有这两个字段，
+整条查询会报错，所以失败时会降级重试一次「只要核心字段」的查询，至少保住标题 / 内容 / 代码模板：
+
+```js
+const extras = withExtras
+    ? `
+        topicTags { name slug translatedName }
+        hints`
+    : "";
 ```
 
 ### 2. 页面内嵌 `__NEXT_DATA__`
@@ -324,7 +346,38 @@ function htmlToText(html) {
 解释：因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。
 ```
 
-## 七、弹窗：语言切换与记忆
+## 七、标签与提示
+
+这两个信息量不大，但很适合练手「数据归一化」：同一份数据在不同站点 / 不同来源里形状不一样，
+先在内容脚本里统一成 `string[]`，弹窗只负责渲染。
+
+```js
+// topicTags：中文站优先翻译名，英文站优先原名，再去重
+const graphTags = normalizeTags(question && question.topicTags, preferZh);
+const tags = graphTags.length ? graphTags : dom.tags || [];   // DOM 兜底
+// hints：HTML 字符串数组 -> 纯文本数组
+const hints = normalizeHints(question && question.hints);
+```
+
+- `topicTags` 形如 `[{ name: "Hash Table", slug: "hash-table", translatedName: "哈希表" }]`，
+  中文站展示「哈希表」，英文站展示 `Hash Table`；
+- `hints` 是 HTML 字符串数组，直接复用前面的 `htmlToText()`，顺便兼容它被塞成 JSON 字符串的情况；
+- 标签额外做了 DOM 兜底：题目描述下方会把标签渲染成指向 `/tag` 或 `topicSlugs=` 的链接，
+  去重后最多取 15 个；提示没有可靠的 DOM 源（页面上只有折叠按钮，内容懒加载），拿不到就显示占位文案。
+
+弹窗里标签渲染成胶囊（`span.tag-chip`），复制时用空格连接；提示单个直接输出、多个自动编号：
+
+```js
+function hintsText() {
+    const hints = currentHints();
+    if (hints.length <= 1) {
+        return hints[0] || "";
+    }
+    return hints.map((hint, index) => `${index + 1}. ${hint}`).join("\n");
+}
+```
+
+## 八、弹窗：语言切换与记忆
 
 `codeSnippets` 里的语言数量最多可达 20 种。弹窗把它们填进下拉框，
 默认选中优先级为：**上次选择 > 页面当前语言 > 默认 `javascript` > 第一项**；
@@ -341,18 +394,23 @@ els.langSelect.addEventListener("change", () => {
 「页面当前语言」来自 LeetCode 自己存在 `localStorage.global_lang` 里的值，
 内容脚本读取后一并返回，这样用户平时写 JavaScript，打开弹窗就默认是 JavaScript。
 
-## 八、复制全部
+## 九、复制全部
 
-「复制全部」把信息拼成一段 Markdown，方便粘贴到笔记或直接丢给 AI：
+「复制全部」把信息拼成一段 Markdown（有标签 / 提示才输出对应内容），方便粘贴到笔记或直接丢给 AI：
 
 ````markdown
 # 1. 两数之和
 
-难度：简单　|　链接：https://leetcode.cn/problems/two-sum/
+难度：简单　|　标签：数组 哈希表　|　链接：https://leetcode.cn/problems/two-sum/
 
 ## 题目描述
 
 给定一个整数数组 nums 和一个整数目标值 target……
+
+## 提示
+
+1. 你可以假设每种输入只会对应一个答案。
+2. 你可以按任意顺序返回答案。
 
 ## 实现方法（JavaScript）
 
@@ -365,7 +423,7 @@ var twoSum = function (nums, target) {
 
 复制用的是 `navigator.clipboard.writeText`，并额外做了 `execCommand("copy")` 的兜底。
 
-## 九、运行扩展
+## 十、运行扩展
 
 1. 打开 `chrome://extensions`，开启「开发者模式」；
 2. 点击「加载已解压的扩展程序」，选择 `code/leetcode-helper` 目录；
@@ -374,7 +432,7 @@ var twoSum = function (nums, target) {
    点进具体题目后点击图标即可复制；
 5. 点击工具栏图标，切换语言、勾选是否去除 HTML 标签，点击按钮复制。
 
-## 十、小结
+## 十一、小结
 
 这个小项目把几个关键点串了起来：
 
@@ -383,6 +441,7 @@ var twoSum = function (nums, target) {
 - 用 `webNavigation` 处理单页应用的站内跳转；
 - 内容脚本发起**同源请求**复用页面的登录态（Cookie / CSRF），拿到官方接口数据；
 - 用「接口 -> 内嵌数据 -> DOM」三级兜底保证健壮性；
+- 把不同来源的标签 / 提示归一化成 `string[]`，弹窗渲染就变成纯展示逻辑；
 - 用 `chrome.storage.sync` 记住用户偏好。
 
 ## 资料

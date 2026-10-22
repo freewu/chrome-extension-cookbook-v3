@@ -57,7 +57,7 @@
 ## 实战项目
 
 * [Magic Tools for Chrome（类型转换 / 编解码 / 加解密 / 值计算 工具箱）](./magic-tools/Readme.md)    
-* [LeetCode 助手（一键复制题目标题 / 内容 / 实现方法）](./leetcode-helper/Readme.md)    
+* [LeetCode 助手（一键复制题目标题 / 内容 / 标签 / 提示 / 实现方法）](./leetcode-helper/Readme.md)    
 * [JSON Viewer（JSON 页面自动格式化 / 折叠 / 搜索）](./json-viewer/Readme.md)    
 
 

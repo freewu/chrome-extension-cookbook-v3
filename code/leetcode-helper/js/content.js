@@ -111,9 +111,61 @@
             .trim();
     }
 
+    // ---------------- 归一化：标签 / 提示 ----------------
+
+    // topicTags 在不同来源里可能是 [{ name, slug, translatedName }] 或字符串数组
+    function normalizeTags(raw, preferZh) {
+        if (!Array.isArray(raw)) {
+            return [];
+        }
+        const names = raw
+            .map((tag) => {
+                if (typeof tag === "string") {
+                    return tag;
+                }
+                if (!tag) {
+                    return "";
+                }
+                return preferZh
+                    ? tag.translatedName || tag.name
+                    : tag.name || tag.translatedName;
+            })
+            .map((name) => (name || "").trim())
+            .filter(Boolean);
+
+        return [...new Set(names)];
+    }
+
+    // hints 是 HTML 字符串数组（个别来源里是 JSON 字符串），统一转成纯文本
+    function normalizeHints(raw) {
+        let value = raw;
+        if (typeof value === "string") {
+            try {
+                value = JSON.parse(value);
+            } catch (error) {
+                value = [value];
+            }
+        }
+        if (!Array.isArray(value)) {
+            return [];
+        }
+        return value
+            .map((hint) => htmlToText(String(hint == null ? "" : hint)).trim())
+            .filter(Boolean);
+    }
+
     // ---------------- 来源 1：GraphQL ----------------
 
-    async function fetchByGraphQL(slug) {
+    // withExtras 为 false 时不查询 topicTags / hints：
+    // 万一某个站点版本的 GraphQL schema 没有这些字段，整条查询会报错，
+    // 此时降级重试，至少保住标题 / 内容 / 代码模板。
+    async function fetchByGraphQL(slug, withExtras = true) {
+        const extras = withExtras
+            ? `
+                topicTags { name slug translatedName }
+                hints`
+            : "";
+
         const query = `query questionData($titleSlug: String!) {
             question(titleSlug: $titleSlug) {
                 questionFrontendId
@@ -122,7 +174,7 @@
                 difficulty
                 content
                 translatedContent
-                codeSnippets { lang langSlug code }
+                codeSnippets { lang langSlug code }${extras}
             }
         }`;
 
@@ -192,6 +244,26 @@
 
     // ---------------- 来源 3：DOM ----------------
 
+    // 题目描述下方会把标签渲染成链接，作为 GraphQL / 内嵌数据都拿不到时的兜底
+    function readTagsFromDom() {
+        const nodes = document.querySelectorAll('a[href*="/tag"], a[href*="topicSlugs="]');
+        const tags = [];
+        const seen = new Set();
+        for (const node of nodes) {
+            // 路径里带 tag 的链接基本只有标签，再限制一下文本长度避免误抓
+            const text = (node.textContent || "").replace(/\s+/g, " ").trim();
+            if (!text || text.length > 40 || seen.has(text)) {
+                continue;
+            }
+            seen.add(text);
+            tags.push(text);
+            if (tags.length >= 15) {
+                break;
+            }
+        }
+        return tags;
+    }
+
     function readFromDom() {
         const titleEl =
             document.querySelector('[data-cy="question-title"]') ||
@@ -216,7 +288,8 @@
         return {
             title,
             frontendId,
-            contentHtml: contentEl ? contentEl.innerHTML : ""
+            contentHtml: contentEl ? contentEl.innerHTML : "",
+            tags: readTagsFromDom()
         };
     }
 
@@ -232,12 +305,19 @@
         }
 
         const errors = [];
+        const preferZh = location.hostname.endsWith("leetcode.cn");
         let question = null;
 
         try {
-            question = await fetchByGraphQL(slug);
+            question = await fetchByGraphQL(slug, true);
         } catch (error) {
-            errors.push(`GraphQL 失败：${error.message}`);
+            // 带标签 / 提示字段的查询失败时，降级成不含这两个字段的查询
+            try {
+                question = await fetchByGraphQL(slug, false);
+                errors.push(`标签 / 提示不可用：${error.message}`);
+            } catch (retryError) {
+                errors.push(`GraphQL 失败：${retryError.message}`);
+            }
         }
 
         if (!question) {
@@ -255,7 +335,10 @@
         const difficulty = (question && question.difficulty) || "";
         const codeSnippets = (question && question.codeSnippets) || [];
 
-        const preferZh = location.hostname.endsWith("leetcode.cn");
+        const graphTags = normalizeTags(question && question.topicTags, preferZh);
+        const tags = graphTags.length ? graphTags : dom.tags || [];
+        const hints = normalizeHints(question && question.hints);
+
         const contentHtml =
             (preferZh
                 ? (question && question.translatedContent) || (question && question.content)
@@ -276,6 +359,8 @@
                 language: preferZh ? "zh" : "en",
                 contentHtml,
                 contentText: htmlToText(contentHtml),
+                tags,
+                hints,
                 codeSnippets,
                 currentLangSlug: localStorage.getItem("global_lang") || "",
                 errors
