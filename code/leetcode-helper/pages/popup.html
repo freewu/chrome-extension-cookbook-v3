@@ -11,24 +11,49 @@
         <p class="subtitle">一键复制题目信息，仅在 leetcode.cn / leetcode.com 生效</p>
     </header>
 
+    <!-- 标签页：当前题目 / 历史题目 -->
+    <nav class="tabs" role="tablist">
+        <button id="tab-current" class="tab tab--active" role="tab" aria-selected="true">当前题目</button>
+        <button id="tab-history" class="tab" role="tab" aria-selected="false">
+            历史题目<span id="history-count" class="tab__badge" hidden>0</span>
+        </button>
+    </nav>
+
     <main class="main">
-        <!-- 读取中 -->
-        <section id="loading" class="state">
-            <span class="spinner"></span>
-            正在读取题目…
+        <!-- 当前题目的各种状态（读取中 / 非题目页 / 出错） -->
+        <section id="view-current">
+            <section id="loading" class="state">
+                <span class="spinner"></span>
+                正在读取题目…
+            </section>
+
+            <section id="not-leetcode" class="state state--warn" hidden>
+                <strong id="not-leetcode-title">当前不是 LeetCode 题目页</strong>
+                <p id="not-leetcode-text">请打开 leetcode.cn 或 leetcode.com 上的某道算法题（含竞赛题目）后再点击本扩展。</p>
+            </section>
+
+            <section id="error" class="state state--error" hidden></section>
         </section>
 
-        <!-- 非 LeetCode 页面 -->
-        <section id="not-leetcode" class="state state--warn" hidden>
-            <strong>当前不是 LeetCode 题目页</strong>
-            <p>请打开 leetcode.cn 或 leetcode.com 上的某道算法题（含竞赛题目）后再点击本扩展。</p>
+        <!-- 历史题目列表 -->
+        <section id="view-history" hidden>
+            <div class="history-bar">
+                <input id="history-search" class="search" type="search" placeholder="搜索题目名称 / 题号">
+                <button id="history-clear" class="btn btn--mini">清空</button>
+            </div>
+            <div id="history-empty" class="state">还没有缓存的题目，打开任意一道题后会自动记录。</div>
+            <ul id="history-list" class="history-list" hidden></ul>
         </section>
 
-        <!-- 出错 -->
-        <section id="error" class="state state--error" hidden></section>
-
-        <!-- 正常界面 -->
+        <!-- 题目详情（当前题目 / 历史题目共用） -->
         <section id="workspace" hidden>
+            <div class="detail-bar">
+                <span id="detail-source" class="detail-bar__text"></span>
+                <button id="btn-refresh" class="btn btn--mini">重新加载</button>
+                <button id="btn-open" class="btn btn--mini">打开原题</button>
+                <button id="btn-back" class="btn btn--mini" hidden>返回列表</button>
+            </div>
+
             <div class="problem">
                 <div class="problem__title">
                     <span id="problem-title"></span>

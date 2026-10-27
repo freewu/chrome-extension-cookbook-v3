@@ -352,6 +352,7 @@
                 slug,
                 contest,
                 url: location.href,
+                origin: location.origin,
                 frontendId,
                 title,
                 translatedTitle,

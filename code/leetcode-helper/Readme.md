@@ -21,8 +21,11 @@
 | 复制提示 | 复制官方提示（Hints）；多个提示自动编号，单个提示直接输出纯文本 |
 | 复制实现方法 | 从下拉框选择语言（C++ / Java / Python3 / JavaScript / Go … 最多 20 种），复制该语言的代码模板 |
 | 复制全部 | 组装成一段 Markdown（标题 + 难度 + 标签 + 链接 + 题目描述 + 提示 + 代码块），方便粘贴到笔记或丢给 AI |
+| 本地缓存 | 每道题读取后自动写入 `localStorage`，再次打开弹窗直接渲染，不再请求页面 |
+| 历史题目 | 弹窗顶部新增「历史题目」标签页，列出缓存过的题目，可搜索、查看详情、打开原题、删除 |
 
 只有在 LeetCode 题目页，工具栏图标才是可用状态；其他网站图标会被禁用。
+「历史题目」标签页不受此限制，在任何页面都能打开查看已缓存的题目。
 
 ## 目录结构
 
@@ -38,8 +41,9 @@ leetcode-helper
 │   └── popup.css          // 弹窗样式
 └── js
     ├── background.js      // service worker：按标签页 URL 启用 / 禁用图标
+    ├── cache.js           // localStorage 缓存：读写、索引、淘汰
     ├── content.js         // 内容脚本：抓取题目数据、响应 popup 请求
-    └── popup.js           // 弹窗逻辑：渲染、语言切换、复制
+    └── popup.js           // 弹窗逻辑：标签页切换、渲染、语言切换、复制
 ```
 
 ## manifest.json 配置
@@ -48,7 +52,7 @@ leetcode-helper
 {
     "manifest_version": 3,
     "name": "LeetCode 助手",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "action": {
         "default_popup": "pages/popup.html"
     },
@@ -95,7 +99,7 @@ leetcode-helper
 | ---- | ---- |
 | `host_permissions` | 限定只能访问 LeetCode 域名，也是内容脚本注入、请求 GraphQL 的前提 |
 | `tabs` | 在 popup 中读取当前标签页 URL，判断是否为题目页 |
-| `storage` | 记忆「是否去除 HTML 标签」和「上次选择的语言」 |
+| `storage` | 记忆「是否去除 HTML 标签」和「上次选择的语言」（`chrome.storage.sync`） |
 | `scripting` | 内容脚本未注入时（如扩展刚安装）兜底手动注入 |
 | `webNavigation` | LeetCode 是单页应用，用它监听 `history.pushState` 触发的站内跳转 |
 
@@ -283,6 +287,104 @@ var twoSum = function (nums, target) {
 ```
 ````
 
+## 本地缓存与历史题目
+
+### 为什么缓存在 localStorage
+
+弹窗页（`chrome-extension://<id>/pages/popup.html`）本身就是一个独立的页面来源，
+`localStorage` 在多次打开弹窗之间是持久的。题目数据量大（题干 HTML + 20 种语言的代码骨架），
+而 `chrome.storage` 有 8KB / 10MB 写入限制、且是异步 API，用 `localStorage` 读写都是同步的，
+弹窗一打开就能**同步**取出缓存并渲染，没有「闪烁一下再显示」的过程。
+
+存储结构（`js/cache.js`）：
+
+```text
+lc_helper:index                      -> [{ key, slug, frontendId, title, difficulty, tags, visitedAt }]
+lc_helper:problem:<origin>|<slug>    -> { ...完整题目数据, cachedAt }
+```
+
+索引里只放列表展示需要的字段，渲染「历史题目」时不必反序列化体积很大的题干；
+缓存键带上了 `origin`，因为同一道题在 `leetcode.cn`（中文）与 `leetcode.com`（英文）上是两份不同内容。
+
+### 命中缓存就不再请求页面
+
+```js
+// js/popup.js
+state.currentKey = problemKey(state.target);
+
+// 关键：本地已有缓存就直接用，不再向页面请求
+const cached = getCached(state.currentKey);
+if (cached) {
+    state.currentData = cached;
+    state.viewData = cached;
+    state.currentFromCache = true;
+    ui.status = "ready";
+    touchMeta(state.currentKey); // 刷新最近访问时间，历史列表按此排序
+    renderWorkspace();
+    return;
+}
+
+await loadFromPage(); // 只有没缓存时才走内容脚本
+```
+
+缓存键由 URL 直接解析得到，**不需要**先和内容脚本通信，所以「秒开」是成立的。
+详情顶部的状态条会写明来源：`本地缓存 · 缓存于 x` / `已从当前页面读取`；
+想看最新数据时点「重新加载」，会强制走一次内容脚本并覆盖缓存。
+
+### 条数上限与空间不足的兜底
+
+`localStorage` 有约 5MB 的配额，题干 HTML 偶尔很大，因此：
+
+- 最多保留 30 条记录，超出按 `visitedAt` 淘汰最旧的；
+- 写入时若抛 `QuotaExceededError`，就先删掉最旧的一条再重试，实在存不下就放弃缓存（不影响复制功能）。
+
+```js
+export function saveProblem(key, data) {
+    const record = { ...data, cachedAt: Date.now() };
+    const meta = toMeta(key, record);
+    const others = readIndex().filter((item) => item.key !== key);
+
+    for (let attempt = 0; attempt <= others.length; attempt++) {
+        try {
+            localStorage.setItem(RECORD_PREFIX + key, JSON.stringify(record));
+            writeIndex([meta, ...others.slice(0, MAX_ENTRIES - 1)]);
+            return meta;
+        } catch (error) {
+            const evicted = others.pop(); // 淘汰最旧的一条后重试
+            if (!evicted) {
+                return null;
+            }
+            removeRecord(evicted.key);
+        }
+    }
+    return null;
+}
+```
+
+### 历史题目标签页
+
+弹窗被拆成两个标签页（`#tab-current` / `#tab-history`），共用同一块详情区（`#workspace`）：
+
+- **当前题目**：缓存命中直接渲染，否则读页面；
+- **历史题目**：按最近访问时间列出缓存过的题目，支持按题目名 / 题号搜索，
+  点击进入详情（可复制、可「打开原题」、可「返回列表」），右侧 ✕ 可单条删除，右上「清空」清空全部。
+
+标签页切换只是置换 `[hidden]`，不销毁已渲染的 DOM，因此来回切换不会重新请求数据：
+
+```js
+function selectTab(mode) {
+    if (mode === "history") {
+        renderHistoryList();
+        showOnlyHistory();
+        return;
+    }
+    showCurrentTab(); // 有数据就直接复用 state.currentData
+}
+```
+
+因为缓存在扩展自己的 `localStorage` 里，**在任意网页**上打开弹窗都能浏览历史题目，
+此时「当前题目」标签页只会提示「当前不是 LeetCode 页面」。
+
 ## 运行扩展
 
 1. 打开 `chrome://extensions` 并开启「开发者模式」。
@@ -294,6 +396,7 @@ var twoSum = function (nums, target) {
 ## 说明
 
 - 代码模板来自题目自带的 `codeSnippets`（即「实现方法」的函数骨架），不是题解文章；题解文章需要登录且多数为付费内容，未纳入。
+- 缓存保存在扩展弹窗自己的 `localStorage` 中（不是网页的 localStorage），卸载扩展会一并清除；如需强制刷新某题内容，点详情顶部的「重新加载」。
 - 标签 / 提示来自 GraphQL 的 `topicTags` / `hints`；若 GraphQL 失败回退到 DOM，只能拿到标签，提示会为空。
 - 若 GraphQL 因网络问题失败，会自动回退到页面内嵌数据或 DOM，此时可能拿不到代码模板。
 - 单页应用站内切题后，标题 / 内容会实时更新；代码模板依赖 GraphQL 保证最新。

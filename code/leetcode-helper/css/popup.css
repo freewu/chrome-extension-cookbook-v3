@@ -37,6 +37,52 @@ body {
     padding: 12px;
 }
 
+/* 标签页：当前题目 / 历史题目 */
+.tabs {
+    display: flex;
+    gap: 6px;
+    padding: 8px 12px 0;
+    background: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #57606a;
+    background: #eaeef2;
+    border: 1px solid #d0d7de;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: #1f2328;
+}
+
+.tab--active {
+    color: #1a7f37;
+    background: #fff;
+}
+
+.tab__badge {
+    min-width: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    background: #2cbb5d;
+    border-radius: 999px;
+}
+
 /* 状态提示 */
 .state {
     display: flex;
@@ -203,6 +249,135 @@ body {
     padding: 8px;
     font-size: 13px;
     font-weight: 600;
+}
+
+.btn--mini {
+    flex: none;
+    padding: 2px 8px;
+    font-size: 11px;
+}
+
+.btn--danger {
+    color: #cf222e;
+    border-color: #cf222e;
+    background: #ffebe9;
+}
+
+/* 详情顶部的来源说明 */
+.detail-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    font-size: 11px;
+    color: #57606a;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+}
+
+.detail-bar__text {
+    flex: 1;
+    word-break: break-all;
+}
+
+/* 历史搜索栏 */
+.history-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.search {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 8px;
+    font-family: inherit;
+    font-size: 12px;
+    color: #1f2328;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+}
+
+.search:focus {
+    outline: none;
+    border-color: #2cbb5d;
+}
+
+/* 历史列表 */
+.history-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.history-item {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 6px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+}
+
+.history-item--current {
+    border-color: #2cbb5d;
+}
+
+.history-item__main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: 8px 10px;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.history-item__main:hover {
+    background: #f6f8fa;
+}
+
+.history-item__title {
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.history-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #8c959f;
+}
+
+.history-item__tags {
+    color: #0969da;
+}
+
+.history-item__del {
+    flex: none;
+    width: 28px;
+    font-size: 12px;
+    color: #8c959f;
+    background: transparent;
+    border: none;
+    border-left: 1px solid #eaeef2;
+    cursor: pointer;
+}
+
+.history-item__del:hover {
+    color: #cf222e;
+    background: #ffebe9;
 }
 
 .actions {
